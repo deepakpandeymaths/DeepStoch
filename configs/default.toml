@@ -1,0 +1,19 @@
+[project]
+name = "DeepStoch"
+version = "0.1.0.dev0"
+stage = "phase-0-foundation"
+
+[data]
+format = "csv"
+time_column = "timestamp"
+target_column = "target"
+
+[experiment]
+random_seed = 42
+forecast_horizon = 1
+history_length = 24
+
+[quality]
+test_command = "python -m pytest"
+health_command = "python -m deepstoch health"
+
