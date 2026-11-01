@@ -12,6 +12,7 @@ from deepstoch.data.report import build_report
 from deepstoch.data.split import chronological_split
 from deepstoch.data.validation import validate_rows
 from deepstoch.core.health import run_health_check
+from deepstoch.experiments.baselines import evaluate_baselines
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -27,6 +28,11 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--time-column", default="timestamp")
     validate.add_argument("--target-column", default="target")
     validate.add_argument("--json", action="store_true", help="Print the report as JSON.")
+    baseline = commands.add_parser("baseline", help="Evaluate Phase 2 forecasting baselines.")
+    baseline.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    baseline.add_argument("--target-column", default="target")
+    baseline.add_argument("--test-size", type=int, default=8, help="Number of final observations used as holdout.")
+    baseline.add_argument("--json", action="store_true", help="Print scores as JSON.")
     return parser
 
 
@@ -63,6 +69,24 @@ def main(argv: list[str] | None = None) -> int:
             for message in report.warnings:
                 print(f"warning: {message}")
         return 0 if report.validation_valid else 1
+    if args.command == "baseline":
+        try:
+            _, rows = load_csv(args.path)
+            values = [float(row[args.target_column]) for row in rows]
+            if args.test_size < 1 or args.test_size >= len(values):
+                raise ValueError("test-size must be at least 1 and smaller than the dataset")
+            scores = evaluate_baselines(values[:-args.test_size], values[-args.test_size:], args.test_size)
+        except (DataLoadError, KeyError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps([score.as_dict() for score in scores], indent=2))
+        else:
+            print(f"dataset: {args.path}")
+            print(f"holdout: {args.test_size} observations")
+            for score in scores:
+                print(f"{score.model}: MAE={score.mae:.4f} RMSE={score.rmse:.4f} MAPE={score.mape:.2f}%")
+        return 0
     print("Unknown command.", file=sys.stderr)
     return 2
 
