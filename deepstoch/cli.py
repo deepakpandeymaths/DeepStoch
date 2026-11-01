@@ -13,7 +13,7 @@ from deepstoch.data.split import chronological_split
 from deepstoch.data.validation import validate_rows
 from deepstoch.core.health import run_health_check
 from deepstoch.experiments.baselines import evaluate_baselines
-from deepstoch.experiments.ml import evaluate_linear_regression
+from deepstoch.experiments.ml import evaluate_linear_regression, evaluate_random_forest
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -39,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     ml.add_argument("--time-column", default="timestamp")
     ml.add_argument("--target-column", default="target")
     ml.add_argument("--test-size", type=int, default=8)
+    ml.add_argument("--model", choices=["linear", "random-forest", "all"], default="all")
     ml.add_argument("--json", action="store_true", help="Print scores as JSON.")
     return parser
 
@@ -56,17 +57,23 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "ml":
         try:
             _, rows = load_csv(args.path)
-            score = evaluate_linear_regression(rows, args.target_column, args.time_column, args.test_size)
+            scorers = {
+                "linear": [evaluate_linear_regression],
+                "random-forest": [evaluate_random_forest],
+                "all": [evaluate_linear_regression, evaluate_random_forest],
+            }[args.model]
+            scores = [scorer(rows, args.target_column, args.time_column, args.test_size) for scorer in scorers]
         except (DataLoadError, KeyError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
         if args.json:
-            print(json.dumps(score.as_dict(), indent=2))
+            print(json.dumps([score.as_dict() for score in scores], indent=2))
         else:
-            print(f"model: {score.model}")
-            print(f"train rows: {score.train_rows}")
-            print(f"test rows: {score.test_rows}")
-            print(f"MAE={score.mae:.4f} RMSE={score.rmse:.4f} MAPE={score.mape:.2f}%")
+            for score in scores:
+                print(f"model: {score.model}")
+                print(f"train rows: {score.train_rows}")
+                print(f"test rows: {score.test_rows}")
+                print(f"MAE={score.mae:.4f} RMSE={score.rmse:.4f} MAPE={score.mape:.2f}%")
         return 0
     if args.command == "validate-data":
         try:

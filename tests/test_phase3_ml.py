@@ -2,7 +2,7 @@ from pathlib import Path
 
 from deepstoch.data.features import FEATURE_NAMES, build_features
 from deepstoch.data.loader import load_csv
-from deepstoch.experiments.ml import evaluate_linear_regression
+from deepstoch.experiments.ml import evaluate_linear_regression, evaluate_random_forest
 
 
 DEMO = Path(__file__).parents[1] / "data" / "demo_energy_demand.csv"
@@ -22,5 +22,13 @@ def test_linear_regression_evaluation_returns_finite_metrics() -> None:
     score = evaluate_linear_regression(rows, test_size=8)
     assert score.model == "linear_regression"
     assert score.train_rows == 37
+    assert score.test_rows == 8
+    assert score.rmse >= 0
+
+
+def test_random_forest_uses_same_holdout_contract() -> None:
+    _, rows = load_csv(DEMO)
+    score = evaluate_random_forest(rows, test_size=8)
+    assert score.model == "random_forest"
     assert score.test_rows == 8
     assert score.rmse >= 0
