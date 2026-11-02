@@ -20,6 +20,7 @@ from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluat
 from deepstoch.experiments.simulation import simulate_dataset
 from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid
 from deepstoch.experiments.rolling import evaluate_rolling_ml_state
+from deepstoch.models.neural_state import train_neural_state_space
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -85,6 +86,12 @@ def build_parser() -> argparse.ArgumentParser:
     rolling.add_argument("--test-size", type=int, default=4)
     rolling.add_argument("--step", type=int, default=4)
     rolling.add_argument("--json", action="store_true")
+    neural_state = commands.add_parser("neural-state", help="Train the optional Phase 8 neural state-space model.")
+    neural_state.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    neural_state.add_argument("--time-column", default="timestamp")
+    neural_state.add_argument("--target-column", default="target")
+    neural_state.add_argument("--sequence-length", type=int, default=6)
+    neural_state.add_argument("--epochs", type=int, default=50)
     return parser
 
 
@@ -187,6 +194,20 @@ def main(argv: list[str] | None = None) -> int:
             print(f"RMSE standard deviation: {result.std_rmse:.4f}")
             print(f"mean interval coverage: {result.mean_coverage:.2%}")
             print(f"mean interval width: {result.mean_interval_width:.4f}")
+        return 0
+    if args.command == "neural-state":
+        try:
+            _, rows = load_csv(args.path)
+            batch = build_sequences_from_rows(rows, args.target_column, args.time_column, args.sequence_length)
+            _, losses = train_neural_state_space(batch, input_size=len(batch.sequences[0][0]), epochs=args.epochs)
+        except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        print("model: neural_state_space")
+        print(f"sequences: {len(batch.sequences)}")
+        print(f"epochs: {args.epochs}")
+        print(f"initial_nll: {losses[0]:.6f}")
+        print(f"final_nll: {losses[-1]:.6f}")
         return 0
     if args.command == "ml":
         try:
