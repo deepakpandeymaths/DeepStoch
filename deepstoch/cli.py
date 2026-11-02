@@ -19,6 +19,7 @@ from deepstoch.models.lstm import train_lstm
 from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 from deepstoch.experiments.simulation import simulate_dataset
 from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid
+from deepstoch.experiments.rolling import evaluate_rolling_ml_state
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -76,6 +77,14 @@ def build_parser() -> argparse.ArgumentParser:
     hybrid.add_argument("--model", choices=["level", "trend", "ml-state", "all"], default="all")
     hybrid.add_argument("--time-column", default="timestamp")
     hybrid.add_argument("--json", action="store_true")
+    rolling = commands.add_parser("rolling-hybrid", help="Run rolling-origin evaluation for the ML-state hybrid.")
+    rolling.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    rolling.add_argument("--time-column", default="timestamp")
+    rolling.add_argument("--target-column", default="target")
+    rolling.add_argument("--minimum-train", type=int, default=24)
+    rolling.add_argument("--test-size", type=int, default=4)
+    rolling.add_argument("--step", type=int, default=4)
+    rolling.add_argument("--json", action="store_true")
     return parser
 
 
@@ -160,6 +169,24 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"MAE={result.mae:.4f} RMSE={result.rmse:.4f}")
                 print(f"interval coverage: {result.interval_coverage:.2%}")
                 print(f"mean interval width: {result.mean_interval_width:.4f}")
+        return 0
+    if args.command == "rolling-hybrid":
+        try:
+            _, rows = load_csv(args.path)
+            result = evaluate_rolling_ml_state(rows, args.target_column, args.time_column, minimum_train=args.minimum_train, test_size=args.test_size, step=args.step)
+        except (DataLoadError, KeyError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            print(f"model: {result.model}")
+            print(f"folds: {result.folds}")
+            print(f"test size: {result.test_size}")
+            print(f"mean RMSE: {result.mean_rmse:.4f}")
+            print(f"RMSE standard deviation: {result.std_rmse:.4f}")
+            print(f"mean interval coverage: {result.mean_coverage:.2%}")
+            print(f"mean interval width: {result.mean_interval_width:.4f}")
         return 0
     if args.command == "ml":
         try:
