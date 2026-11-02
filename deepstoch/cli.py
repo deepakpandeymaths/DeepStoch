@@ -16,6 +16,7 @@ from deepstoch.experiments.baselines import evaluate_baselines
 from deepstoch.experiments.ml import evaluate_linear_regression, evaluate_random_forest
 from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.models.lstm import train_lstm
+from deepstoch.experiments.uncertainty import evaluate_conformal_linear
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -49,6 +50,14 @@ def build_parser() -> argparse.ArgumentParser:
     neural.add_argument("--target-column", default="target")
     neural.add_argument("--sequence-length", type=int, default=6)
     neural.add_argument("--epochs", type=int, default=50)
+    uncertainty = commands.add_parser("uncertainty", help="Evaluate Phase 5 conformal prediction intervals.")
+    uncertainty.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    uncertainty.add_argument("--time-column", default="timestamp")
+    uncertainty.add_argument("--target-column", default="target")
+    uncertainty.add_argument("--calibration-size", type=int, default=8)
+    uncertainty.add_argument("--test-size", type=int, default=8)
+    uncertainty.add_argument("--coverage", type=float, default=0.9)
+    uncertainty.add_argument("--json", action="store_true")
     return parser
 
 
@@ -75,6 +84,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"epochs: {args.epochs}")
         print(f"initial_loss: {losses[0]:.6f}")
         print(f"final_loss: {losses[-1]:.6f}")
+        return 0
+    if args.command == "uncertainty":
+        try:
+            _, rows = load_csv(args.path)
+            result = evaluate_conformal_linear(rows, args.target_column, args.time_column, args.calibration_size, args.test_size, args.coverage)
+        except (DataLoadError, KeyError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            print(f"nominal coverage: {result.nominal_coverage:.0%}")
+            print(f"calibration size: {result.calibration_size}")
+            print(f"interval radius: {result.radius:.4f}")
+            print(f"empirical test coverage: {result.empirical_coverage:.2%}")
+            print(f"mean interval width: {result.mean_width:.4f}")
         return 0
     if args.command == "ml":
         try:
