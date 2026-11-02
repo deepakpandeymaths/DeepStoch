@@ -18,7 +18,7 @@ from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.models.lstm import train_lstm
 from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 from deepstoch.experiments.simulation import simulate_dataset
-from deepstoch.experiments.hybrid import evaluate_local_level
+from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -73,6 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     hybrid.add_argument("path", type=Path, help="Path to the CSV dataset.")
     hybrid.add_argument("--target-column", default="target")
     hybrid.add_argument("--test-size", type=int, default=8)
+    hybrid.add_argument("--model", choices=["level", "trend", "all"], default="all")
     hybrid.add_argument("--json", action="store_true")
     return parser
 
@@ -143,19 +144,21 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "hybrid":
         try:
             _, rows = load_csv(args.path)
-            result = evaluate_local_level(rows, args.target_column, args.test_size)
+            evaluators = {"level": [evaluate_local_level], "trend": [evaluate_local_trend], "all": [evaluate_local_level, evaluate_local_trend]}[args.model]
+            results = [evaluator(rows, args.target_column, args.test_size) for evaluator in evaluators]
         except (DataLoadError, KeyError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
         if args.json:
-            print(json.dumps(result.as_dict(), indent=2))
+            print(json.dumps([result.as_dict() for result in results], indent=2))
         else:
-            print(f"model: {result.model}")
-            print(f"train size: {result.train_size}")
-            print(f"test size: {result.test_size}")
-            print(f"MAE={result.mae:.4f} RMSE={result.rmse:.4f}")
-            print(f"interval coverage: {result.interval_coverage:.2%}")
-            print(f"mean interval width: {result.mean_interval_width:.4f}")
+            for result in results:
+                print(f"model: {result.model}")
+                print(f"train size: {result.train_size}")
+                print(f"test size: {result.test_size}")
+                print(f"MAE={result.mae:.4f} RMSE={result.rmse:.4f}")
+                print(f"interval coverage: {result.interval_coverage:.2%}")
+                print(f"mean interval width: {result.mean_interval_width:.4f}")
         return 0
     if args.command == "ml":
         try:

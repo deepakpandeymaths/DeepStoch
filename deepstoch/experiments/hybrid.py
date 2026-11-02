@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 from deepstoch.evaluation.metrics import mae, rmse
-from deepstoch.stochastic.state_space import LocalLevelModel
+from deepstoch.stochastic.state_space import LocalLevelModel, LocalLinearTrendModel
 
 
 @dataclass(frozen=True)
@@ -32,6 +32,19 @@ def evaluate_local_level(rows: list[dict[str, str]], target_column: str = "targe
     forecast = model.fit(train).forecast(test_size)
     covered = sum(lower <= actual <= upper for actual, lower, upper in zip(test, forecast.lower, forecast.upper))
     return HybridScore("local_level_state_space", len(train), len(test), mae(test, forecast.mean), rmse(test, forecast.mean), covered / len(test), sum(upper - lower for lower, upper in zip(forecast.lower, forecast.upper)) / len(test))
+
+
+def evaluate_local_trend(rows: list[dict[str, str]], target_column: str = "target", test_size: int = 8) -> HybridScore:
+    """Fit a latent level-and-trend process on the past."""
+    values = [float(row[target_column]) for row in rows]
+    if test_size < 1 or test_size >= len(values):
+        raise ValueError("test-size must be at least 1 and smaller than the dataset")
+    train, test = values[:-test_size], values[-test_size:]
+    variance = _variance_of_differences(train)
+    model = LocalLinearTrendModel(level_variance=max(1.0, variance), trend_variance=max(0.1, variance / 10), observation_variance=max(1.0, variance / 2))
+    forecast = model.fit(train).forecast(test_size)
+    covered = sum(lower <= actual <= upper for actual, lower, upper in zip(test, forecast.lower, forecast.upper))
+    return HybridScore("local_linear_trend_state_space", len(train), len(test), mae(test, forecast.mean), rmse(test, forecast.mean), covered / len(test), sum(upper - lower for lower, upper in zip(forecast.lower, forecast.upper)) / len(test))
 
 
 def _variance_of_differences(values: list[float]) -> float:

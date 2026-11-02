@@ -10,7 +10,12 @@ Run the experiment:
 ```powershell
 python -m deepstoch hybrid data/demo_energy_demand.csv --test-size 8
 python -m deepstoch hybrid data/demo_energy_demand.csv --test-size 8 --json
+python -m deepstoch hybrid data/demo_energy_demand.csv --model all --test-size 8
 ```
+
+The local-linear-trend variant is included alongside the local-level model. The
+trend state estimates persistent movement in the latent signal and produces
+horizon-dependent uncertainty.
 
 This is an interpretable stochastic baseline for future hybrid models. The next
 research steps are to combine learned features with latent states, add seasonal
