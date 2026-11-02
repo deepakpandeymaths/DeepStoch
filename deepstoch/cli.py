@@ -14,6 +14,8 @@ from deepstoch.data.validation import validate_rows
 from deepstoch.core.health import run_health_check
 from deepstoch.experiments.baselines import evaluate_baselines
 from deepstoch.experiments.ml import evaluate_linear_regression, evaluate_random_forest
+from deepstoch.data.sequences import build_sequences_from_rows
+from deepstoch.models.lstm import train_lstm
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -41,6 +43,12 @@ def build_parser() -> argparse.ArgumentParser:
     ml.add_argument("--test-size", type=int, default=8)
     ml.add_argument("--model", choices=["linear", "random-forest", "all"], default="all")
     ml.add_argument("--json", action="store_true", help="Print scores as JSON.")
+    neural = commands.add_parser("neural", help="Train the optional Phase 4 LSTM model.")
+    neural.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    neural.add_argument("--time-column", default="timestamp")
+    neural.add_argument("--target-column", default="target")
+    neural.add_argument("--sequence-length", type=int, default=6)
+    neural.add_argument("--epochs", type=int, default=50)
     return parser
 
 
@@ -53,6 +61,20 @@ def main(argv: list[str] | None = None) -> int:
         else:
             for key, value in report.as_dict().items():
                 print(f"{key}: {value}")
+        return 0
+    if args.command == "neural":
+        try:
+            _, rows = load_csv(args.path)
+            batch = build_sequences_from_rows(rows, args.target_column, args.time_column, args.sequence_length)
+            _, losses = train_lstm(batch, input_size=len(batch.sequences[0][0]), epochs=args.epochs)
+        except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        print(f"model: lstm")
+        print(f"sequences: {len(batch.sequences)}")
+        print(f"epochs: {args.epochs}")
+        print(f"initial_loss: {losses[0]:.6f}")
+        print(f"final_loss: {losses[-1]:.6f}")
         return 0
     if args.command == "ml":
         try:
