@@ -10,10 +10,12 @@ PyTorch is optional. Install it before training:
 
 ```powershell
 python -m pip install -e ".[deep-learning]"
-python -m deepstoch neural-state data/demo_energy_demand.csv --sequence-length 6 --epochs 50
+python -m deepstoch neural-state data/demo_energy_demand.csv --sequence-length 6 --epochs 50 --checkpoint artifacts/neural_state_space.pt
 ```
 
 The current environment does not contain PyTorch, so the CLI reports the
 dependency requirement rather than claiming an untrained neural result. Future
-work will add validation splits, checkpointing, calibration, and comparison
-with the ML-plus-state hybrid.
+The training command now creates a chronological train/validation split, tracks
+validation negative log-likelihood, applies patience-based early stopping, and
+saves the best checkpoint. Future work will add calibration, test-set inference,
+and comparison with the ML-plus-state hybrid.

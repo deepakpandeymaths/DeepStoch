@@ -13,6 +13,15 @@ class SequenceBatch:
     targets: list[float]
     end_indices: list[int]
 
+    def split(self, validation_fraction: float = 0.2) -> tuple["SequenceBatch", "SequenceBatch"]:
+        """Split sequences chronologically without shuffling."""
+        if not 0 < validation_fraction < 1:
+            raise ValueError("validation_fraction must be between 0 and 1")
+        if len(self.sequences) < 2:
+            raise ValueError("at least two sequences are required")
+        split_index = max(1, min(len(self.sequences) - 1, int(len(self.sequences) * (1 - validation_fraction))))
+        return (SequenceBatch(self.sequences[:split_index], self.targets[:split_index], self.end_indices[:split_index]), SequenceBatch(self.sequences[split_index:], self.targets[split_index:], self.end_indices[split_index:]))
+
 
 def build_sequences(feature_rows: list[FeatureRow], sequence_length: int = 6) -> SequenceBatch:
     """Create past-only feature windows whose label is the next row target."""

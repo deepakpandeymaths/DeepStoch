@@ -92,6 +92,8 @@ def build_parser() -> argparse.ArgumentParser:
     neural_state.add_argument("--target-column", default="target")
     neural_state.add_argument("--sequence-length", type=int, default=6)
     neural_state.add_argument("--epochs", type=int, default=50)
+    neural_state.add_argument("--patience", type=int, default=10)
+    neural_state.add_argument("--checkpoint", type=Path, default=Path("artifacts/neural_state_space.pt"))
     return parser
 
 
@@ -199,15 +201,22 @@ def main(argv: list[str] | None = None) -> int:
         try:
             _, rows = load_csv(args.path)
             batch = build_sequences_from_rows(rows, args.target_column, args.time_column, args.sequence_length)
-            _, losses = train_neural_state_space(batch, input_size=len(batch.sequences[0][0]), epochs=args.epochs)
+            training_batch, validation_batch = batch.split()
+            args.checkpoint.parent.mkdir(parents=True, exist_ok=True)
+            _, losses, validation_losses = train_neural_state_space(training_batch, input_size=len(batch.sequences[0][0]), validation_batch=validation_batch, epochs=args.epochs, patience=args.patience, checkpoint_path=args.checkpoint)
         except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
         print("model: neural_state_space")
         print(f"sequences: {len(batch.sequences)}")
+        print(f"training sequences: {len(training_batch.sequences)}")
+        print(f"validation sequences: {len(validation_batch.sequences)}")
         print(f"epochs: {args.epochs}")
         print(f"initial_nll: {losses[0]:.6f}")
         print(f"final_nll: {losses[-1]:.6f}")
+        if validation_losses:
+            print(f"best_validation_nll: {min(validation_losses):.6f}")
+        print(f"checkpoint: {args.checkpoint}")
         return 0
     if args.command == "ml":
         try:

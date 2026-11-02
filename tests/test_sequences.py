@@ -14,3 +14,10 @@ def test_sequences_are_chronological_and_past_only() -> None:
     assert batch.end_indices[0] == 7
     assert batch.end_indices == sorted(batch.end_indices)
     assert batch.targets[0] == float(rows[7]["target"])
+
+
+def test_sequence_split_preserves_temporal_order() -> None:
+    _, rows = load_csv(DEMO)
+    train, validation = build_sequences_from_rows(rows, sequence_length=4).split()
+    assert train.end_indices[-1] < validation.end_indices[0]
+    assert len(train.sequences) + len(validation.sequences) == 41
