@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DeepStoch Research Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">RESEARCH SOFTWARE PLATFORM</p>
+      <h1>DeepStoch</h1>
+      <p class="subtitle">Uncertainty-aware deep learning and stochastic modelling</p>
+    </div>
+    <span class="badge">Phase 7 prototype</span>
+  </header>
+
+  <main class="container">
+    <section class="grid cards" aria-label="Project summary">
+      <article class="card"><span class="label">Current phase</span><strong id="current-phase">Dashboard</strong><small>Browser workflow foundation</small></article>
+      <article class="card"><span class="label">Tests</span><strong id="test-count">19 passed</strong><small>Latest local verification</small></article>
+      <article class="card"><span class="label">License</span><strong>GPL-3.0+</strong><small>Open research software</small></article>
+      <article class="card"><span class="label">Data mode</span><strong>Demo dataset</strong><small>Energy-demand example</small></article>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading"><div><p class="eyebrow">MODEL EVALUATION</p><h2>Forecast comparison</h2></div><span class="muted">Chronological holdout</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Model</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>Status</th></tr></thead><tbody id="model-table"></tbody></table></div>
+    </section>
+
+    <section class="grid two-columns">
+      <article class="panel"><div class="section-heading"><div><p class="eyebrow">UNCERTAINTY</p><h2>Calibration summary</h2></div></div><div id="uncertainty" class="metric-list"></div></article>
+      <article class="panel"><div class="section-heading"><div><p class="eyebrow">SIMULATION</p><h2>Future trajectory summary</h2></div></div><div id="simulation" class="metric-list"></div></article>
+    </section>
+
+    <section class="panel"><div class="section-heading"><div><p class="eyebrow">DEVELOPMENT</p><h2>Roadmap status</h2></div></div><div id="roadmap" class="roadmap"></div></section>
+
+    <footer><span>DeepStoch research dashboard prototype</span><span>Data shown is a reproducible demo snapshot, not a production forecast.</span></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
