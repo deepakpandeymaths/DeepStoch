@@ -18,6 +18,7 @@ from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.models.lstm import train_lstm
 from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 from deepstoch.experiments.simulation import simulate_dataset
+from deepstoch.experiments.hybrid import evaluate_local_level
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -68,6 +69,11 @@ def build_parser() -> argparse.ArgumentParser:
     simulation.add_argument("--seed", type=int, default=42)
     simulation.add_argument("--threshold", type=float)
     simulation.add_argument("--json", action="store_true")
+    hybrid = commands.add_parser("hybrid", help="Evaluate the Phase 8 local-level state-space model.")
+    hybrid.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    hybrid.add_argument("--target-column", default="target")
+    hybrid.add_argument("--test-size", type=int, default=8)
+    hybrid.add_argument("--json", action="store_true")
     return parser
 
 
@@ -133,6 +139,23 @@ def main(argv: list[str] | None = None) -> int:
             print(f"10%-90% final range: [{result.quantiles['0.1'][-1]:.4f}, {result.quantiles['0.9'][-1]:.4f}]")
             if result.probability_exceeds_threshold is not None:
                 print(f"probability of crossing threshold: {result.probability_exceeds_threshold:.2%}")
+        return 0
+    if args.command == "hybrid":
+        try:
+            _, rows = load_csv(args.path)
+            result = evaluate_local_level(rows, args.target_column, args.test_size)
+        except (DataLoadError, KeyError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            print(f"model: {result.model}")
+            print(f"train size: {result.train_size}")
+            print(f"test size: {result.test_size}")
+            print(f"MAE={result.mae:.4f} RMSE={result.rmse:.4f}")
+            print(f"interval coverage: {result.interval_coverage:.2%}")
+            print(f"mean interval width: {result.mean_interval_width:.4f}")
         return 0
     if args.command == "ml":
         try:
