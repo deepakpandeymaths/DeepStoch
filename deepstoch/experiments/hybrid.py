@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 from deepstoch.evaluation.metrics import mae, rmse
+from deepstoch.data.features import build_features
+from deepstoch.models.linear import LinearRegression
 from deepstoch.stochastic.state_space import LocalLevelModel, LocalLinearTrendModel
 
 
@@ -45,6 +47,27 @@ def evaluate_local_trend(rows: list[dict[str, str]], target_column: str = "targe
     forecast = model.fit(train).forecast(test_size)
     covered = sum(lower <= actual <= upper for actual, lower, upper in zip(test, forecast.lower, forecast.upper))
     return HybridScore("local_linear_trend_state_space", len(train), len(test), mae(test, forecast.mean), rmse(test, forecast.mean), covered / len(test), sum(upper - lower for lower, upper in zip(forecast.lower, forecast.upper)) / len(test))
+
+
+def evaluate_ml_state_hybrid(rows: list[dict[str, str]], target_column: str = "target", time_column: str = "timestamp", test_size: int = 8) -> HybridScore:
+    """Correct a linear ML forecast with a filtered latent residual state."""
+    feature_rows = build_features(rows, target_column, time_column)
+    if test_size < 1 or test_size >= len(feature_rows):
+        raise ValueError("test-size must be at least 1 and smaller than the usable feature rows")
+    train = feature_rows[:-test_size]
+    test = feature_rows[-test_size:]
+    model = LinearRegression().fit([item.features for item in train], [item.target for item in train])
+    train_prediction = model.predict([item.features for item in train])
+    residuals = [item.target - prediction for item, prediction in zip(train, train_prediction)]
+    residual_variance = max(1.0, _variance_of_differences(residuals))
+    residual_state = LocalLevelModel(process_variance=residual_variance, observation_variance=max(1.0, residual_variance / 2)).fit(residuals).forecast(test_size)
+    base_prediction = model.predict([item.features for item in test])
+    predictions = [base + correction for base, correction in zip(base_prediction, residual_state.mean)]
+    actual = [item.target for item in test]
+    lower = [prediction + correction for prediction, correction in zip(base_prediction, residual_state.lower)]
+    upper = [prediction + correction for prediction, correction in zip(base_prediction, residual_state.upper)]
+    covered = sum(low <= value <= high for value, low, high in zip(actual, lower, upper))
+    return HybridScore("linear_ml_plus_residual_state", len(train), len(test), mae(actual, predictions), rmse(actual, predictions), covered / len(actual), sum(high - low for low, high in zip(lower, upper)) / len(actual))
 
 
 def _variance_of_differences(values: list[float]) -> float:

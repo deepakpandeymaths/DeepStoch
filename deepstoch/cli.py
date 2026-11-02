@@ -18,7 +18,7 @@ from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.models.lstm import train_lstm
 from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 from deepstoch.experiments.simulation import simulate_dataset
-from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend
+from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -73,7 +73,8 @@ def build_parser() -> argparse.ArgumentParser:
     hybrid.add_argument("path", type=Path, help="Path to the CSV dataset.")
     hybrid.add_argument("--target-column", default="target")
     hybrid.add_argument("--test-size", type=int, default=8)
-    hybrid.add_argument("--model", choices=["level", "trend", "all"], default="all")
+    hybrid.add_argument("--model", choices=["level", "trend", "ml-state", "all"], default="all")
+    hybrid.add_argument("--time-column", default="timestamp")
     hybrid.add_argument("--json", action="store_true")
     return parser
 
@@ -144,8 +145,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "hybrid":
         try:
             _, rows = load_csv(args.path)
-            evaluators = {"level": [evaluate_local_level], "trend": [evaluate_local_trend], "all": [evaluate_local_level, evaluate_local_trend]}[args.model]
-            results = [evaluator(rows, args.target_column, args.test_size) for evaluator in evaluators]
+            evaluators = {"level": [evaluate_local_level], "trend": [evaluate_local_trend], "ml-state": [evaluate_ml_state_hybrid], "all": [evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid]}[args.model]
+            results = [evaluator(rows, args.target_column, args.time_column, args.test_size) if evaluator is evaluate_ml_state_hybrid else evaluator(rows, args.target_column, args.test_size) for evaluator in evaluators]
         except (DataLoadError, KeyError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2

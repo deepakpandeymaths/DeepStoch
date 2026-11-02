@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from deepstoch.data.loader import load_csv
-from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend
+from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid
 from deepstoch.stochastic.state_space import LocalLevelModel, LocalLinearTrendModel
 
 
@@ -33,3 +33,12 @@ def test_local_trend_experiment_returns_metrics() -> None:
     result = evaluate_local_trend(rows, test_size=8)
     assert result.model == "local_linear_trend_state_space"
     assert result.test_size == 8
+
+
+def test_ml_state_hybrid_uses_feature_and_state_contract() -> None:
+    _, rows = load_csv(DEMO)
+    result = evaluate_ml_state_hybrid(rows, test_size=8)
+    assert result.model == "linear_ml_plus_residual_state"
+    assert result.train_size == 37
+    assert result.test_size == 8
+    assert result.mean_interval_width > 0

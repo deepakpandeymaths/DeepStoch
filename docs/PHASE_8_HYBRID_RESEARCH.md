@@ -11,11 +11,17 @@ Run the experiment:
 python -m deepstoch hybrid data/demo_energy_demand.csv --test-size 8
 python -m deepstoch hybrid data/demo_energy_demand.csv --test-size 8 --json
 python -m deepstoch hybrid data/demo_energy_demand.csv --model all --test-size 8
+python -m deepstoch hybrid data/demo_energy_demand.csv --model ml-state --test-size 8
 ```
 
 The local-linear-trend variant is included alongside the local-level model. The
 trend state estimates persistent movement in the latent signal and produces
 horizon-dependent uncertainty.
+
+The ML-state model first fits the existing leakage-safe linear-regression
+features, then filters the training residuals with a local-level state model.
+Its final forecast combines the learned feature prediction with the latent
+residual correction and its state uncertainty.
 
 This is an interpretable stochastic baseline for future hybrid models. The next
 research steps are to combine learned features with latent states, add seasonal
