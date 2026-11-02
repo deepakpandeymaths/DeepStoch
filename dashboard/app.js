@@ -17,6 +17,10 @@ const snapshot = {
     ["10%-90% final range", "389.16–650.33"],
     ["Crossing probability", "1.00% at threshold 700"]
   ],
+  rolling: {
+    summary: [["Mean RMSE", "9.1505"], ["RMSE standard deviation", "7.2493"], ["Mean coverage", "95.83%"], ["Mean interval width", "74.3880"]],
+    folds: [[21, 23.2248, "75.00%", 36.1335], [25, 12.9887, "100.00%", 86.6492], [29, 6.1640, "100.00%", 86.1735], [33, 1.3800, "100.00%", 82.5466], [37, 7.5218, "100.00%", 78.4465], [41, 3.6238, "100.00%", 76.3788]]
+  },
   roadmap: [
     ["0–6", "Foundation to simulation", "done"],
     ["7", "Dashboard", "next"],
@@ -35,6 +39,10 @@ function renderMetrics(id, metrics) {
 }
 renderMetrics("uncertainty", snapshot.uncertainty);
 renderMetrics("simulation", snapshot.simulation);
+renderMetrics("rolling-summary", snapshot.rolling.summary);
+document.querySelector("#rolling-table").innerHTML = snapshot.rolling.folds.map((fold, index) => `
+  <tr><td>${index + 1}</td><td>${fold[0]}</td><td>${fold[1].toFixed(4)}</td><td>${fold[2]}</td><td>${fold[3].toFixed(4)}</td></tr>
+`).join("");
 document.querySelector("#roadmap").innerHTML = snapshot.roadmap.map(([phase, title, status]) => `
   <div class="milestone ${status}"><b><span class="dot"></span>Phase ${phase}</b><small>${title}</small></div>
 `).join("");

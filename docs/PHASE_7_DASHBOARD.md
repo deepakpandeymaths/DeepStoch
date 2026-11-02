@@ -18,3 +18,7 @@ be connected to a live experiment database. The next dashboard milestone will
 connect generated JSON reports, add forecast and interval charts, and expose
 dataset/model controls. Phase 8 will then add hybrid neural state-space and
 neural stochastic research modules.
+
+The dashboard now also displays rolling-origin hybrid evaluation, including
+aggregate RMSE variation, empirical coverage, interval width, and each temporal
+fold. It is therefore an evidence viewer as well as a project-status prototype.
