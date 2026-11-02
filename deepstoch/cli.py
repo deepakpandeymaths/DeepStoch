@@ -17,6 +17,7 @@ from deepstoch.experiments.ml import evaluate_linear_regression, evaluate_random
 from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.models.lstm import train_lstm
 from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
+from deepstoch.experiments.simulation import simulate_dataset
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -59,6 +60,14 @@ def build_parser() -> argparse.ArgumentParser:
     uncertainty.add_argument("--coverage", type=float, default=0.9)
     uncertainty.add_argument("--coverages", help="Comma-separated levels, for example 0.8,0.9,0.95.")
     uncertainty.add_argument("--json", action="store_true")
+    simulation = commands.add_parser("simulate", help="Generate Phase 6 stochastic future trajectories.")
+    simulation.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    simulation.add_argument("--target-column", default="target")
+    simulation.add_argument("--horizon", type=int, default=24)
+    simulation.add_argument("--paths", type=int, default=1000)
+    simulation.add_argument("--seed", type=int, default=42)
+    simulation.add_argument("--threshold", type=float)
+    simulation.add_argument("--json", action="store_true")
     return parser
 
 
@@ -107,6 +116,23 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"interval radius: {result.radius:.4f}")
                 print(f"empirical test coverage: {result.empirical_coverage:.2%}")
                 print(f"mean interval width: {result.mean_width:.4f}")
+        return 0
+    if args.command == "simulate":
+        try:
+            _, rows = load_csv(args.path)
+            result = simulate_dataset(rows, args.target_column, args.horizon, args.paths, args.seed, args.threshold)
+        except (DataLoadError, KeyError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            print(f"paths: {result.paths}")
+            print(f"horizon: {result.horizon}")
+            print(f"median final value: {result.quantiles['0.5'][-1]:.4f}")
+            print(f"10%-90% final range: [{result.quantiles['0.1'][-1]:.4f}, {result.quantiles['0.9'][-1]:.4f}]")
+            if result.probability_exceeds_threshold is not None:
+                print(f"probability of crossing threshold: {result.probability_exceeds_threshold:.2%}")
         return 0
     if args.command == "ml":
         try:
