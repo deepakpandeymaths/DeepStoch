@@ -10,9 +10,11 @@ Run the experiment:
 ```powershell
 python -m deepstoch uncertainty data/demo_energy_demand.csv --coverage 0.90
 python -m deepstoch uncertainty data/demo_energy_demand.csv --coverage 0.90 --json
+python -m deepstoch uncertainty data/demo_energy_demand.csv --coverages 0.80,0.90,0.95 --json
 ```
 
 The report includes nominal coverage, calibration size, interval radius,
 empirical test coverage, and mean interval width. This is a first calibrated
 uncertainty layer; later work will add conditional intervals, probabilistic
-neural forecasts, calibration curves, and coverage-vs-width comparisons.
+neural forecasts, and calibration curves. The multi-level command provides the
+first coverage-versus-width table for this analysis.

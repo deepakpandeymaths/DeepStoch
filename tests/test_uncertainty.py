@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from deepstoch.data.loader import load_csv
-from deepstoch.experiments.uncertainty import evaluate_conformal_linear
+from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 from deepstoch.uncertainty.conformal import split_conformal_interval
 
 
@@ -22,3 +22,10 @@ def test_uncertainty_experiment_returns_calibrated_report() -> None:
     assert result.test_size == 8
     assert 0 <= result.empirical_coverage <= 1
     assert result.radius >= 0
+
+
+def test_multiple_coverage_levels_are_ordered_by_width() -> None:
+    _, rows = load_csv(DEMO)
+    results = evaluate_conformal_levels(rows, [0.8, 0.9, 0.95], calibration_size=8, test_size=8)
+    assert [result.nominal_coverage for result in results] == [0.8, 0.9, 0.95]
+    assert results[0].mean_width <= results[1].mean_width <= results[2].mean_width

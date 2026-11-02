@@ -16,7 +16,7 @@ from deepstoch.experiments.baselines import evaluate_baselines
 from deepstoch.experiments.ml import evaluate_linear_regression, evaluate_random_forest
 from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.models.lstm import train_lstm
-from deepstoch.experiments.uncertainty import evaluate_conformal_linear
+from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -57,6 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
     uncertainty.add_argument("--calibration-size", type=int, default=8)
     uncertainty.add_argument("--test-size", type=int, default=8)
     uncertainty.add_argument("--coverage", type=float, default=0.9)
+    uncertainty.add_argument("--coverages", help="Comma-separated levels, for example 0.8,0.9,0.95.")
     uncertainty.add_argument("--json", action="store_true")
     return parser
 
@@ -88,18 +89,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "uncertainty":
         try:
             _, rows = load_csv(args.path)
-            result = evaluate_conformal_linear(rows, args.target_column, args.time_column, args.calibration_size, args.test_size, args.coverage)
+            if args.coverages:
+                levels = [float(value.strip()) for value in args.coverages.split(",") if value.strip()]
+                results = evaluate_conformal_levels(rows, levels, args.target_column, args.time_column, args.calibration_size, args.test_size)
+            else:
+                results = [evaluate_conformal_linear(rows, args.target_column, args.time_column, args.calibration_size, args.test_size, args.coverage)]
         except (DataLoadError, KeyError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
         if args.json:
-            print(json.dumps(result.as_dict(), indent=2))
+            payload = [result.as_dict() for result in results]
+            print(json.dumps(payload if len(payload) > 1 else payload[0], indent=2))
         else:
-            print(f"nominal coverage: {result.nominal_coverage:.0%}")
-            print(f"calibration size: {result.calibration_size}")
-            print(f"interval radius: {result.radius:.4f}")
-            print(f"empirical test coverage: {result.empirical_coverage:.2%}")
-            print(f"mean interval width: {result.mean_width:.4f}")
+            for result in results:
+                print(f"nominal coverage: {result.nominal_coverage:.0%}")
+                print(f"calibration size: {result.calibration_size}")
+                print(f"interval radius: {result.radius:.4f}")
+                print(f"empirical test coverage: {result.empirical_coverage:.2%}")
+                print(f"mean interval width: {result.mean_width:.4f}")
         return 0
     if args.command == "ml":
         try:
