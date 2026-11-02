@@ -49,3 +49,7 @@ configs/         Versioned configuration files
 deepstoch_sop/   Editable LaTeX SOP project
 ```
 
+## License
+
+DeepStoch is released under the GNU General Public License v3.0 or later.
+See [LICENSE](LICENSE) for the complete terms.
