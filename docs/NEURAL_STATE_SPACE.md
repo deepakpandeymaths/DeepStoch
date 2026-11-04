@@ -19,7 +19,8 @@ saves the best checkpoint. Future work will add calibration, test-set inference,
 and comparison with the ML-plus-state hybrid.
 
 The first verified CPU training run used 39 sequences (31 training and 8
-validation sequences) for 50 epochs. Its training NLL decreased from
-296343.1875 to 3158.3936, with best validation NLL 3769.4744. The generated
+validation sequences) for 50 epochs with training-only feature and target
+standardization. Its training NLL decreased from 1.5531 to 0.6106, with best
+validation NLL 1.1225. The generated
 checkpoint is intentionally ignored by Git because model binaries are local
 experiment artefacts and should be managed separately from source code.

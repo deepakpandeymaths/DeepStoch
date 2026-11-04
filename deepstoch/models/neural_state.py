@@ -40,8 +40,17 @@ def train_neural_state_space(sequence_batch, *, input_size: int, validation_batc
     torch, _ = _torch()
     torch.manual_seed(seed)
     model = create_neural_state_space(input_size)
-    features = torch.tensor(sequence_batch.sequences, dtype=torch.float32)
-    targets = torch.tensor(sequence_batch.targets, dtype=torch.float32)
+    feature_values = [value for sequence in sequence_batch.sequences for row in sequence for value in row]
+    feature_width = len(sequence_batch.sequences[0][0])
+    feature_mean = [sum(row[column] for sequence in sequence_batch.sequences for row in sequence) / (len(sequence_batch.sequences) * len(sequence_batch.sequences[0])) for column in range(feature_width)]
+    feature_std = [(sum((row[column] - feature_mean[column]) ** 2 for sequence in sequence_batch.sequences for row in sequence) / max(1, len(feature_values) // feature_width - 1)) ** 0.5 for column in range(feature_width)]
+    feature_std = [value if value > 1e-8 else 1.0 for value in feature_std]
+    target_mean = sum(sequence_batch.targets) / len(sequence_batch.targets)
+    target_std = (sum((value - target_mean) ** 2 for value in sequence_batch.targets) / max(1, len(sequence_batch.targets) - 1)) ** 0.5
+    target_std = target_std if target_std > 1e-8 else 1.0
+    normalize = lambda sequences: [[[((value - feature_mean[column]) / feature_std[column]) for column, value in enumerate(row)] for row in sequence] for sequence in sequences]
+    features = torch.tensor(normalize(sequence_batch.sequences), dtype=torch.float32)
+    targets = torch.tensor([(value - target_mean) / target_std for value in sequence_batch.targets], dtype=torch.float32)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     losses: list[float] = []
     validation_losses: list[float] = []
@@ -60,8 +69,8 @@ def train_neural_state_space(sequence_batch, *, input_size: int, validation_batc
         if validation_batch is not None:
             model.eval()
             with torch.no_grad():
-                validation_features = torch.tensor(validation_batch.sequences, dtype=torch.float32)
-                validation_targets = torch.tensor(validation_batch.targets, dtype=torch.float32)
+                validation_features = torch.tensor(normalize(validation_batch.sequences), dtype=torch.float32)
+                validation_targets = torch.tensor([(value - target_mean) / target_std for value in validation_batch.targets], dtype=torch.float32)
                 validation_mean, validation_scale = model(validation_features)
                 validation_loss = float(-torch.distributions.Normal(validation_mean, validation_scale).log_prob(validation_targets).mean().item())
             validation_losses.append(validation_loss)
@@ -71,7 +80,7 @@ def train_neural_state_space(sequence_batch, *, input_size: int, validation_batc
                 best_state = {name: value.detach().clone() for name, value in model.state_dict().items()}
                 stale_epochs = 0
                 if checkpoint_path is not None:
-                    torch.save({"model_state": model.state_dict(), "epoch": len(losses), "validation_loss": validation_loss, "input_size": input_size}, checkpoint_path)
+                    torch.save({"model_state": model.state_dict(), "epoch": len(losses), "validation_loss": validation_loss, "input_size": input_size, "feature_mean": feature_mean, "feature_std": feature_std, "target_mean": target_mean, "target_std": target_std}, checkpoint_path)
             else:
                 stale_epochs += 1
                 if stale_epochs >= patience:

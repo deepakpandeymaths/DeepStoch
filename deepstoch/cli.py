@@ -21,6 +21,7 @@ from deepstoch.experiments.simulation import simulate_dataset
 from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid
 from deepstoch.experiments.rolling import evaluate_rolling_ml_state
 from deepstoch.models.neural_state import train_neural_state_space
+from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -94,6 +95,15 @@ def build_parser() -> argparse.ArgumentParser:
     neural_state.add_argument("--epochs", type=int, default=50)
     neural_state.add_argument("--patience", type=int, default=10)
     neural_state.add_argument("--checkpoint", type=Path, default=Path("artifacts/neural_state_space.pt"))
+    neural_eval = commands.add_parser("neural-evaluate", help="Evaluate a trained neural state-space checkpoint.")
+    neural_eval.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    neural_eval.add_argument("--checkpoint", type=Path, default=Path("artifacts/neural_state_space.pt"))
+    neural_eval.add_argument("--time-column", default="timestamp")
+    neural_eval.add_argument("--target-column", default="target")
+    neural_eval.add_argument("--sequence-length", type=int, default=6)
+    neural_eval.add_argument("--test-size", type=int, default=8)
+    neural_eval.add_argument("--coverage", type=float, default=0.9)
+    neural_eval.add_argument("--json", action="store_true")
     return parser
 
 
@@ -217,6 +227,23 @@ def main(argv: list[str] | None = None) -> int:
         if validation_losses:
             print(f"best_validation_nll: {min(validation_losses):.6f}")
         print(f"checkpoint: {args.checkpoint}")
+        return 0
+    if args.command == "neural-evaluate":
+        try:
+            _, rows = load_csv(args.path)
+            result = evaluate_neural_state_space(rows, args.checkpoint, args.target_column, args.time_column, args.sequence_length, args.test_size, args.coverage)
+        except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            print(f"model: {result.model}")
+            print(f"test size: {result.test_size}")
+            print(f"MAE={result.mae:.4f} RMSE={result.rmse:.4f} MAPE={result.mape:.2f}%")
+            print(f"nominal coverage: {result.nominal_coverage:.0%}")
+            print(f"empirical coverage: {result.empirical_coverage:.2%}")
+            print(f"mean interval width: {result.mean_interval_width:.4f}")
         return 0
     if args.command == "ml":
         try:
