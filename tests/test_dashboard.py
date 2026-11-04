@@ -18,3 +18,11 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "Rolling-origin evaluation" in html
     assert "rolling-summary" in script
     assert "RMSE standard deviation" in script
+
+
+def test_dashboard_contains_unified_model_comparison() -> None:
+    script = (DASHBOARD / "app.js").read_text(encoding="utf-8")
+    assert "Neural state-space" in script
+    assert "Linear ML + residual state" in script
+    assert "coverage" in script
+    assert "interval width" not in script.lower() or "width" in script

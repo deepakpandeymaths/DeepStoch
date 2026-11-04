@@ -22,3 +22,7 @@ neural stochastic research modules.
 The dashboard now also displays rolling-origin hybrid evaluation, including
 aggregate RMSE variation, empirical coverage, interval width, and each temporal
 fold. It is therefore an evidence viewer as well as a project-status prototype.
+
+The model table now contains the unified comparison across baselines, classical
+ML, state-space, hybrid, and neural models, including both point-error metrics
+and uncertainty metrics where available.

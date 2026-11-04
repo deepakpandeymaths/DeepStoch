@@ -1,8 +1,12 @@
 const snapshot = {
   models: [
-    { name: "Seasonal naive", mae: 7.5000, rmse: 7.5000, mape: 1.15, status: "Reference" },
-    { name: "Linear regression", mae: 9.3398, rmse: 10.0411, mape: 1.41, status: "Best demo RMSE" },
-    { name: "Random Forest", mae: 22.5467, rmse: 30.3171, mape: 3.82, status: "Benchmark" }
+    { name: "Linear ML + residual state", mae: 5.6077, rmse: 6.7111, mape: null, coverage: "100.00%", width: 97.9382, status: "Best demo RMSE" },
+    { name: "Seasonal naive", mae: 7.5000, rmse: 7.5000, mape: 1.15, coverage: null, width: null, status: "Reference" },
+    { name: "Linear regression", mae: 9.3398, rmse: 10.0411, mape: 1.41, coverage: null, width: null, status: "Benchmark" },
+    { name: "Random Forest", mae: 22.5467, rmse: 30.3171, mape: 3.82, coverage: null, width: null, status: "Benchmark" },
+    { name: "Neural state-space", mae: 67.1321, rmse: 73.3443, mape: 10.19, coverage: "100.00%", width: 267.8903, status: "Initial neural run" },
+    { name: "Local-level state-space", mae: 68.6303, rmse: 79.5340, mape: null, coverage: "100.00%", width: 278.2685, status: "Stochastic baseline" },
+    { name: "Local-linear-trend state-space", mae: 75.6830, rmse: 103.4272, mape: null, coverage: "100.00%", width: 393.3754, status: "Stochastic baseline" }
   ],
   uncertainty: [
     ["Nominal coverage", "80%, 90%, 95%"],
@@ -31,7 +35,7 @@ const snapshot = {
 };
 
 document.querySelector("#model-table").innerHTML = snapshot.models.map(model => `
-  <tr><td><strong>${model.name}</strong></td><td>${model.mae.toFixed(4)}</td><td>${model.rmse.toFixed(4)}</td><td>${model.mape.toFixed(2)}%</td><td class="status">${model.status}</td></tr>
+  <tr><td><strong>${model.name}</strong></td><td>${model.mae.toFixed(4)}</td><td>${model.rmse.toFixed(4)}</td><td>${model.mape === null ? "—" : model.mape.toFixed(2) + "%"}</td><td>${model.coverage ?? "—"}</td><td>${model.width === null ? "—" : model.width.toFixed(4)}</td><td class="status">${model.status}</td></tr>
 `).join("");
 
 function renderMetrics(id, metrics) {
