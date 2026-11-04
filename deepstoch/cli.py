@@ -22,6 +22,7 @@ from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_tr
 from deepstoch.experiments.rolling import evaluate_rolling_ml_state
 from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
+from deepstoch.experiments.compare import compare_models
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -104,6 +105,13 @@ def build_parser() -> argparse.ArgumentParser:
     neural_eval.add_argument("--test-size", type=int, default=8)
     neural_eval.add_argument("--coverage", type=float, default=0.9)
     neural_eval.add_argument("--json", action="store_true")
+    compare = commands.add_parser("compare", help="Build a unified model comparison report.")
+    compare.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    compare.add_argument("--checkpoint", type=Path, default=Path("artifacts/neural_state_space.pt"))
+    compare.add_argument("--time-column", default="timestamp")
+    compare.add_argument("--target-column", default="target")
+    compare.add_argument("--test-size", type=int, default=8)
+    compare.add_argument("--json", action="store_true")
     return parser
 
 
@@ -244,6 +252,20 @@ def main(argv: list[str] | None = None) -> int:
             print(f"nominal coverage: {result.nominal_coverage:.0%}")
             print(f"empirical coverage: {result.empirical_coverage:.2%}")
             print(f"mean interval width: {result.mean_interval_width:.4f}")
+        return 0
+    if args.command == "compare":
+        try:
+            _, rows = load_csv(args.path)
+            result = compare_models(rows, target_column=args.target_column, time_column=args.time_column, test_size=args.test_size, neural_checkpoint=args.checkpoint)
+        except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps([row.as_dict() for row in result], indent=2))
+        else:
+            print("model | RMSE | MAE | MAPE | coverage | interval width")
+            for row in result:
+                print(f"{row.model} | {row.rmse if row.rmse is not None else '-'} | {row.mae if row.mae is not None else '-'} | {row.mape if row.mape is not None else '-'} | {row.coverage if row.coverage is not None else '-'} | {row.interval_width if row.interval_width is not None else '-'}")
         return 0
     if args.command == "ml":
         try:
