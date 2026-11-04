@@ -12,6 +12,7 @@ mlruns/
 experiments/runs/
 reports/generated/
 models/artifacts/
+artifacts/
 data/raw/
 data/private/
 .vscode/
