@@ -1,0 +1,17 @@
+{
+  "name": "ElectricityLoadDiagrams20112014",
+  "provider": "UCI Machine Learning Repository",
+  "repository_id": 321,
+  "doi": "10.24432/C58C86",
+  "source_url": "https://archive.ics.uci.edu/dataset/321/electricityloaddiagrams20112",
+  "license": "CC BY 4.0",
+  "time_resolution": "15 minutes",
+  "clients": 370,
+  "source_format": "semicolon-delimited text; first column is timestamp and remaining columns are clients",
+  "deepstoch_target_mapping": "one selected client column becomes target",
+  "notes": [
+    "The original dataset is not committed to this repository because of its large download size.",
+    "The UCI description states that the values are in kW and that kWh requires division by 4.",
+    "Time-change days contain documented zero or aggregated intervals and must be preserved or explicitly handled in preprocessing."
+  ]
+}
