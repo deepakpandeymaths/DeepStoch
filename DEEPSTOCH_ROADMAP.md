@@ -2,7 +2,7 @@
 
 ## Vision
 
-DeepStoch is a long-term software platform combining deep neural networks, classical machine learning, stochastic processes, uncertainty estimation, simulation, and decision support.
+DeepStoch is a long-term software platform combining deep neural networks, classical machine learning, stochastic processes, uncertainty estimation, simulation, model comparison, and decision support.
 
 ## Dissertation objective
 
@@ -11,6 +11,21 @@ To design and implement a modular software platform that combines neural forecas
 ## First complete product
 
 The first release will accept a time-series dataset, validate and preprocess it, train baseline and neural models, produce probabilistic forecasts, estimate uncertainty, simulate possible future trajectories, detect unusual observations, and present the results through a dashboard.
+
+## Current implementation status
+
+| Phase | Status | Evidence |
+|---|---|---|
+| 0. Foundation | Completed | Python package, CLI, tests, SOP, report, GPL-3.0 licence |
+| 1. Data foundation | Completed | CSV validation, chronological splitting, feature construction |
+| 2. Baselines | Completed | Statistical baselines and common metrics |
+| 3. Classical ML | Completed | Linear regression, Random Forest, leakage-safe features |
+| 4. Neural sequence setup | Completed | Sequence builder and optional neural model foundation |
+| 5. Uncertainty | Completed | Conformal intervals, neural predictive intervals, calibration reports |
+| 6. Simulation | Completed | Bootstrap trajectories and threshold probabilities |
+| 7. Dashboard | Completed | Browser dashboard with model and robustness evidence |
+| 8. Hybrid research | In progress | State-space, ML-state hybrid, rolling evaluation, neural state-space |
+| 9. Dissertation release | Pending | Real-world studies, final tables, user manual, and release archive |
 
 ## Model progression
 
@@ -33,21 +48,21 @@ Repository, Python package, configuration, health check, tests, documentation, a
 
 CSV loading, schema validation, timestamp checks, missing values, leakage checks, preprocessing, and chronological splitting.
 
-### Phase 2 - Baselines
+### Phase 2 - Baselines and classical ML
 
-Statistical and classical machine-learning models with common metrics and experiment tracking.
+Statistical and classical machine-learning models with common metrics, feature engineering, and experiment comparison.
 
-### Phase 3 - Deep forecasting
+### Phase 3 - Deep forecasting foundation
 
-PyTorch dataset windows, LSTM or GRU training, checkpoints, inference, and visualizations.
+Sequence windows, optional PyTorch training, neural checkpoints, inference, and probabilistic output heads.
 
-### Phase 4 - Probabilistic output
+### Phase 4 - Probabilistic output and neural uncertainty
 
 Quantile loss, distributional prediction, prediction intervals, coverage, and calibration.
 
 ### Phase 5 - Uncertainty engine
 
-Monte Carlo dropout, deep ensembles, confidence warnings, and out-of-distribution analysis.
+Conformal intervals, neural predictive scales, rolling calibration, deep ensembles, confidence warnings, and out-of-distribution analysis.
 
 ### Phase 6 - Stochastic simulation
 
@@ -55,15 +70,24 @@ Reusable process simulators and Monte Carlo scenario generation.
 
 ### Phase 7 - Dashboard
 
-Browser workflow, run history, forecast charts, uncertainty plots, simulation results, and reports.
+Browser workflow, model comparison, rolling evidence, uncertainty summaries, simulation results, roadmap status, and reports.
 
 ### Phase 8 - Hybrid research
 
-Neural state-space and neural-SDE prototypes.
+Local-level and local-trend state-space models, ML-plus-residual-state correction, rolling-origin evaluation, neural state-space training, checkpoint inference, and neural-SDE prototypes.
 
 ### Phase 9 - Dissertation release
 
-Frozen implementation, reproducible demonstration, evaluation report, user manual, and dissertation evidence archive.
+Real-world datasets, frozen implementation, reproducible demonstrations, unified model tables, calibration studies, user manual, and dissertation evidence archive.
+
+## Immediate next work
+
+1. Complete acquisition and conversion of the registered UCI electricity dataset.
+2. Run validation and model comparison on selected client series.
+3. Run rolling-origin experiments on real-world data.
+4. Add real-world comparison results to the dashboard and project report.
+5. Repeat across additional domains before making general research claims.
+6. Add ablations, significance analysis, and final dissertation artefacts.
 
 ## Twenty-four-week plan
 
@@ -80,5 +104,5 @@ Frozen implementation, reproducible demonstration, evaluation report, user manua
 
 ## Success criteria
 
-The dissertation release must support a clean-environment workflow from data upload to validated forecast, uncertainty visualization, stochastic simulation, and report export. Every result must be linked to a dataset, configuration, code revision, and evaluation record.
+The dissertation release must support a clean-environment workflow from data upload to validated forecast, uncertainty visualization, stochastic simulation, model comparison, and report export. Every result must be linked to a dataset, licence/provenance record, configuration, code revision, and evaluation record.
 
