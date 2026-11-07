@@ -31,3 +31,22 @@ The exact client column must be read from the downloaded source header; `MT_001`
 is an example placeholder, not a guaranteed column name. The raw source and
 derived real-world data are excluded from the public code commit until their
 storage and attribution policy is confirmed.
+
+## Second registered source: Appliances Energy Prediction
+
+DeepStoch also registers UCI's `Appliances Energy Prediction` dataset. The UCI
+record describes 19,735 observations, 28 features, approximately 4.5 months of
+10-minute measurements, and a CC BY 4.0 licence. Its DOI is `10.24432/C5VC8G`.
+See `data/metadata/uci_appliances_energy.json` and the [UCI record](https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction).
+
+The intended canonical mapping is:
+
+```text
+date       -> timestamp
+Appliances -> target
+```
+
+The other sensor and weather columns can be retained as covariates after a
+dataset-specific converter is added. The dataset is registered now, but no
+model result is claimed until the complete source file is downloaded, checked,
+converted, validated, and evaluated chronologically.

@@ -1,0 +1,19 @@
+{
+  "name": "Appliances Energy Prediction",
+  "provider": "UCI Machine Learning Repository",
+  "repository_id": 374,
+  "doi": "10.24432/C5VC8G",
+  "source_url": "https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction",
+  "license": "CC BY 4.0",
+  "instances": 19735,
+  "features": 28,
+  "time_resolution": "10 minutes",
+  "target_column": "Appliances",
+  "timestamp_column": "date",
+  "source_format": "CSV; one timestamp column, appliance-energy target, indoor sensor variables, and weather variables",
+  "notes": [
+    "The UCI description states that the experiment covers approximately 4.5 months in a low-energy building.",
+    "Weather data were merged from the nearest airport weather station.",
+    "The raw archive is not committed to this repository; provenance and conversion instructions are versioned instead."
+  ]
+}
