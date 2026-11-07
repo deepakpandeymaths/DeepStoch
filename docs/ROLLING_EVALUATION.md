@@ -50,3 +50,9 @@ mean RMSE `91.9541`, RMSE standard deviation `22.7604`, mean empirical coverage
 `94.5527%`, coverage standard deviation `2.4602%`, and mean interval width
 `336.3556`. This indicates that average coverage remained above the nominal
 level across seeds, while fold-to-fold error variation remained material.
+
+The JSON report also contains a `calibration` object with signed coverage
+error, absolute coverage error, minimum and maximum fold coverage, mean
+interval width, and interval-width standard deviation. Coverage error is
+defined as `empirical coverage - nominal coverage`, so over-coverage and
+under-coverage remain distinguishable.

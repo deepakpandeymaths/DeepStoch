@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 from deepstoch.experiments.hybrid import HybridScore, evaluate_ml_state_hybrid
 from deepstoch.data.sequences import build_sequences_from_rows
 from deepstoch.experiments.neural_eval import NeuralEvaluation, evaluate_neural_state_space
+from deepstoch.evaluation.calibration import summarize_calibration
 from deepstoch.models.neural_state import train_neural_state_space
 
 
@@ -39,6 +40,7 @@ class RepeatedRollingSummary:
     mean_coverage: float
     std_coverage: float
     mean_interval_width: float
+    calibration: dict[str, object]
     seed_summaries: list[dict[str, object]]
 
     def as_dict(self) -> dict[str, object]:
@@ -207,5 +209,6 @@ def evaluate_repeated_rolling_neural_state(
         mean_coverage,
         math.sqrt(coverage_variance),
         sum(float(fold["mean_interval_width"]) for fold in fold_scores) / len(fold_scores),
+        summarize_calibration(fold_scores).as_dict(),
         [summary.as_dict() for summary in summaries],
     )

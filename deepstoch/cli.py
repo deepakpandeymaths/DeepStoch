@@ -299,6 +299,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"RMSE standard deviation: {result.std_rmse:.4f}")
             print(f"mean interval coverage: {result.mean_coverage:.2%}")
             print(f"coverage standard deviation: {result.std_coverage:.2%}")
+            print(f"absolute coverage error: {result.calibration['absolute_coverage_error']:.2%}")
+            print(f"fold coverage range: [{result.calibration['minimum_fold_coverage']:.2%}, {result.calibration['maximum_fold_coverage']:.2%}]")
             print(f"mean interval width: {result.mean_interval_width:.4f}")
         return 0
     if args.command == "neural-state":
