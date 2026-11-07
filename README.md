@@ -380,6 +380,17 @@ Every neural fold is retrained from scratch. Feature and target normalization
 statistics are calculated inside that fold's training prefix, so future test
 observations cannot influence model fitting or scaling.
 
+To test seed sensitivity, repeat the rolling experiment:
+
+```powershell
+python -m deepstoch rolling-neural-repeated data/real_world/uci_appliances.csv `
+  --minimum-train 12000 --test-size 672 --step 672 `
+  --epochs 6 --patience 3 --seeds 42,43,44 --json
+```
+
+The repeated report includes aggregate RMSE and coverage variation together
+with the complete result for each seed.
+
 The report includes fold count, mean RMSE, RMSE standard deviation, mean
 coverage, mean interval width, and fold-level results. This is the required
 structure for dissertation-scale temporal claims.

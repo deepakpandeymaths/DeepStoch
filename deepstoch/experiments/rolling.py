@@ -28,6 +28,23 @@ class RollingSummary:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class RepeatedRollingSummary:
+    model: str
+    seeds: list[int]
+    folds_per_seed: int
+    test_size: int
+    mean_rmse: float
+    std_rmse: float
+    mean_coverage: float
+    std_coverage: float
+    mean_interval_width: float
+    seed_summaries: list[dict[str, object]]
+
+    def as_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
 def evaluate_rolling_ml_state(
     rows: list[dict[str, str]],
     target_column: str = "target",
@@ -75,6 +92,7 @@ def evaluate_rolling_neural_state(
     epochs: int = 20,
     patience: int = 5,
     nominal_coverage: float = 0.9,
+    seed: int = 42,
 ) -> RollingSummary:
     """Retrain and evaluate the neural state-space model at each time origin.
 
@@ -107,7 +125,7 @@ def evaluate_rolling_neural_state(
                 epochs=epochs,
                 patience=patience,
                 checkpoint_path=checkpoint,
-                seed=42 + fold,
+                seed=seed + fold,
             )
             scores.append(
                 evaluate_neural_state_space(
@@ -134,4 +152,60 @@ def evaluate_rolling_neural_state(
         sum(score.empirical_coverage for score in scores) / len(scores),
         sum(score.mean_interval_width for score in scores) / len(scores),
         [score.as_dict() for score in scores],
+    )
+
+
+def evaluate_repeated_rolling_neural_state(
+    rows: list[dict[str, str]],
+    target_column: str = "target",
+    time_column: str = "timestamp",
+    *,
+    seeds: list[int] | tuple[int, ...] = (42, 43, 44),
+    sequence_length: int = 6,
+    minimum_train: int = 120,
+    test_size: int = 24,
+    step: int = 24,
+    epochs: int = 20,
+    patience: int = 5,
+    nominal_coverage: float = 0.9,
+) -> RepeatedRollingSummary:
+    """Repeat rolling neural evaluation for independent random seeds."""
+    if not seeds:
+        raise ValueError("at least one seed is required")
+    if len(set(seeds)) != len(seeds):
+        raise ValueError("seeds must be unique")
+    summaries = [
+        evaluate_rolling_neural_state(
+            rows,
+            target_column,
+            time_column,
+            sequence_length=sequence_length,
+            minimum_train=minimum_train,
+            test_size=test_size,
+            step=step,
+            epochs=epochs,
+            patience=patience,
+            nominal_coverage=nominal_coverage,
+            seed=seed,
+        )
+        for seed in seeds
+    ]
+    fold_scores = [fold for summary in summaries for fold in summary.fold_scores]
+    rmses = [float(fold["rmse"]) for fold in fold_scores]
+    coverages = [float(fold["empirical_coverage"]) for fold in fold_scores]
+    mean_rmse = sum(rmses) / len(rmses)
+    mean_coverage = sum(coverages) / len(coverages)
+    rmse_variance = sum((value - mean_rmse) ** 2 for value in rmses) / len(rmses)
+    coverage_variance = sum((value - mean_coverage) ** 2 for value in coverages) / len(coverages)
+    return RepeatedRollingSummary(
+        summaries[0].model,
+        list(seeds),
+        summaries[0].folds,
+        test_size,
+        mean_rmse,
+        math.sqrt(rmse_variance),
+        mean_coverage,
+        math.sqrt(coverage_variance),
+        sum(float(fold["mean_interval_width"]) for fold in fold_scores) / len(fold_scores),
+        [summary.as_dict() for summary in summaries],
     )

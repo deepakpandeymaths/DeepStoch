@@ -108,3 +108,30 @@ variation across folds also shows that performance changes with the temporal
 regime. This is an initial rolling experiment: repeated seeds, fold-level
 calibration plots, comparisons against rolling classical baselines, and
 additional datasets are still needed before drawing broad conclusions.
+
+## Repeated-seed stability run
+
+The rolling experiment was repeated with three independent random seeds:
+
+```text
+Seeds: 42, 43, 44
+Folds per seed: 11
+Total independently retrained folds: 33
+Training epochs per fold: 6
+Early-stopping patience: 3
+```
+
+| Metric | Result |
+|---|---:|
+| Mean RMSE across seeds and folds | 91.9541 |
+| RMSE standard deviation | 22.7604 |
+| Mean empirical coverage | 94.5527% |
+| Coverage standard deviation | 2.4602% |
+| Mean interval width | 336.3556 |
+
+Average coverage remained above the nominal 90% level across the three seeds.
+However, the substantial RMSE variation confirms that temporal regime and
+fold selection matter more than a single aggregate score suggests. This is a
+stability checkpoint, not a final hyperparameter study; the next calibration
+work should include coverage-versus-width plots and matched rolling results
+for classical and hybrid baselines.

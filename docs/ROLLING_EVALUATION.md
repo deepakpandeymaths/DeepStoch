@@ -35,3 +35,18 @@ deviation `23.5358`, mean empirical coverage `94.7646%` at nominal 90%, and
 mean interval width `331.2871`. These are initial research measurements, not
 general performance claims; seed sensitivity, calibration analysis, and
 additional datasets remain required.
+
+For seed-stability analysis, repeat the same rolling protocol with independent
+initializations:
+
+```powershell
+python -m deepstoch rolling-neural-repeated data/real_world/uci_appliances.csv `
+  --sequence-length 6 --minimum-train 12000 --test-size 672 --step 672 `
+  --epochs 6 --patience 3 --seeds 42,43,44 --json
+```
+
+The first three-seed run covered 33 independently retrained folds and produced
+mean RMSE `91.9541`, RMSE standard deviation `22.7604`, mean empirical coverage
+`94.5527%`, coverage standard deviation `2.4602%`, and mean interval width
+`336.3556`. This indicates that average coverage remained above the nominal
+level across seeds, while fold-to-fold error variation remained material.
