@@ -48,3 +48,31 @@ The hybrid intervals were extremely wide, so coverage must be considered
 together with interval width. The next experiment is rolling-origin evaluation
 on this real-world series, followed by training a dataset-specific neural
 checkpoint before comparing neural results.
+
+## Dataset-specific neural state-space run
+
+A separate probabilistic GRU checkpoint was trained using only this UCI
+dataset. The checkpoint was not reused from the synthetic demonstration
+dataset.
+
+```text
+Training sequences:       15,780
+Validation sequences:      3,946
+Initial validation NLL:   1.564926
+Final validation NLL:     1.166559
+Best validation NLL:      1.046790
+```
+
+Evaluation on the same final 1,974-observation chronological test block:
+
+| Model | MAE | RMSE | MAPE | Empirical coverage | Mean interval width |
+|---|---:|---:|---:|---:|---:|
+| Dataset-specific neural state-space | 42.1574 | 89.7262 | 36.8310% | 95.74% | 317.9312 |
+
+The nominal interval level was 90%. Empirical coverage was therefore above
+the nominal level on this holdout, while the interval was substantially
+narrower than the initial ML-plus-residual-state interval. The neural point
+forecast did not outperform the linear regression or hybrid point forecast
+on this first holdout. These results are evidence of a working
+dataset-specific pipeline, not a final model-selection claim; rolling-origin
+neural evaluation and further calibration are required.
