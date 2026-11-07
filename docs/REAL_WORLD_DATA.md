@@ -46,7 +46,16 @@ date       -> timestamp
 Appliances -> target
 ```
 
-The other sensor and weather columns can be retained as covariates after a
-dataset-specific converter is added. The dataset is registered now, but no
+The converter now preserves selected sensor/weather columns as covariates:
+
+```powershell
+python scripts\convert_uci_appliances.py `
+  path\to\energydata_complete.csv `
+  data\real_world\uci_appliances.csv
+```
+
+The default covariates are `T1`, `RH_1`, `T2`, `RH_2`, `T_out`, `RH_out`,
+`Windspeed`, and `Visibility`. Custom columns can be supplied with
+`--covariates`. The dataset is registered now, but no
 model result is claimed until the complete source file is downloaded, checked,
 converted, validated, and evaluated chronologically.
