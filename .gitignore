@@ -15,6 +15,7 @@ models/artifacts/
 artifacts/
 data/raw/
 data/generated/
+data/real_world/
 data/private/
 .vscode/
 .idea/

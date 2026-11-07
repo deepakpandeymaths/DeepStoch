@@ -107,7 +107,7 @@ def build_parser() -> argparse.ArgumentParser:
     neural_eval.add_argument("--json", action="store_true")
     compare = commands.add_parser("compare", help="Build a unified model comparison report.")
     compare.add_argument("path", type=Path, help="Path to the CSV dataset.")
-    compare.add_argument("--checkpoint", type=Path, default=Path("artifacts/neural_state_space.pt"))
+    compare.add_argument("--checkpoint", type=Path, default=None, help="Optional checkpoint trained on this same dataset.")
     compare.add_argument("--time-column", default="timestamp")
     compare.add_argument("--target-column", default="target")
     compare.add_argument("--test-size", type=int, default=8)
