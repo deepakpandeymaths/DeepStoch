@@ -19,7 +19,7 @@ from deepstoch.models.lstm import train_lstm
 from deepstoch.experiments.uncertainty import evaluate_conformal_levels, evaluate_conformal_linear
 from deepstoch.experiments.simulation import simulate_dataset
 from deepstoch.experiments.hybrid import evaluate_local_level, evaluate_local_trend, evaluate_ml_state_hybrid
-from deepstoch.experiments.rolling import evaluate_rolling_ml_state
+from deepstoch.experiments.rolling import evaluate_rolling_ml_state, evaluate_rolling_neural_state
 from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
@@ -88,6 +88,18 @@ def build_parser() -> argparse.ArgumentParser:
     rolling.add_argument("--test-size", type=int, default=4)
     rolling.add_argument("--step", type=int, default=4)
     rolling.add_argument("--json", action="store_true")
+    rolling_neural = commands.add_parser("rolling-neural", help="Run leakage-safe rolling-origin neural state-space evaluation.")
+    rolling_neural.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    rolling_neural.add_argument("--time-column", default="timestamp")
+    rolling_neural.add_argument("--target-column", default="target")
+    rolling_neural.add_argument("--sequence-length", type=int, default=6)
+    rolling_neural.add_argument("--minimum-train", type=int, default=120)
+    rolling_neural.add_argument("--test-size", type=int, default=24)
+    rolling_neural.add_argument("--step", type=int, default=24)
+    rolling_neural.add_argument("--epochs", type=int, default=20)
+    rolling_neural.add_argument("--patience", type=int, default=5)
+    rolling_neural.add_argument("--coverage", type=float, default=0.9)
+    rolling_neural.add_argument("--json", action="store_true")
     neural_state = commands.add_parser("neural-state", help="Train the optional Phase 8 neural state-space model.")
     neural_state.add_argument("path", type=Path, help="Path to the CSV dataset.")
     neural_state.add_argument("--time-column", default="timestamp")
@@ -202,6 +214,35 @@ def main(argv: list[str] | None = None) -> int:
             _, rows = load_csv(args.path)
             result = evaluate_rolling_ml_state(rows, args.target_column, args.time_column, minimum_train=args.minimum_train, test_size=args.test_size, step=args.step)
         except (DataLoadError, KeyError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            print(f"model: {result.model}")
+            print(f"folds: {result.folds}")
+            print(f"test size: {result.test_size}")
+            print(f"mean RMSE: {result.mean_rmse:.4f}")
+            print(f"RMSE standard deviation: {result.std_rmse:.4f}")
+            print(f"mean interval coverage: {result.mean_coverage:.2%}")
+            print(f"mean interval width: {result.mean_interval_width:.4f}")
+        return 0
+    if args.command == "rolling-neural":
+        try:
+            _, rows = load_csv(args.path)
+            result = evaluate_rolling_neural_state(
+                rows,
+                args.target_column,
+                args.time_column,
+                sequence_length=args.sequence_length,
+                minimum_train=args.minimum_train,
+                test_size=args.test_size,
+                step=args.step,
+                epochs=args.epochs,
+                patience=args.patience,
+                nominal_coverage=args.coverage,
+            )
+        except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
         if args.json:

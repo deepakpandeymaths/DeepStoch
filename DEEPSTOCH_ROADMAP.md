@@ -24,7 +24,7 @@ The first release will accept a time-series dataset, validate and preprocess it,
 | 5. Uncertainty | Completed | Conformal intervals, neural predictive intervals, calibration reports |
 | 6. Simulation | Completed | Bootstrap trajectories and threshold probabilities |
 | 7. Dashboard | Completed | Browser dashboard with model and robustness evidence |
-| 8. Hybrid research | In progress | State-space, ML-state hybrid, rolling evaluation, neural state-space |
+| 8. Hybrid research | In progress | State-space, ML-state hybrid, rolling evaluation, neural state-space, real-world neural folds |
 | 9. Dissertation release | Pending | Real-world studies, final tables, user manual, and release archive |
 
 ## Model progression
@@ -84,7 +84,7 @@ Real-world datasets, frozen implementation, reproducible demonstrations, unified
 
 1. Complete acquisition and conversion of the registered UCI electricity dataset.
 2. Run validation and model comparison on selected client series.
-3. Run rolling-origin experiments on real-world data.
+3. Run rolling-origin experiments on real-world data, including dataset-specific neural retraining.
 4. Add real-world comparison results to the dashboard and project report.
 5. Repeat across additional domains before making general research claims.
 6. Add ablations, significance analysis, and final dissertation artefacts.

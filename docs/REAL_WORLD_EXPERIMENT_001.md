@@ -76,3 +76,35 @@ forecast did not outperform the linear regression or hybrid point forecast
 on this first holdout. These results are evidence of a working
 dataset-specific pipeline, not a final model-selection claim; rolling-origin
 neural evaluation and further calibration are required.
+
+## Rolling-origin neural evaluation
+
+To test temporal stability, the neural model was retrained independently at
+each origin using the following configuration:
+
+```text
+Sequence length: 6
+Minimum training rows: 12,000
+Test block per fold: 672
+Step between origins: 672
+Training epochs: 8
+Early-stopping patience: 3
+Folds: 11
+Nominal coverage: 90%
+```
+
+Aggregate results across all 11 chronological folds:
+
+| Metric | Result |
+|---|---:|
+| Mean RMSE | 91.1869 |
+| RMSE standard deviation | 23.5358 |
+| Mean empirical coverage | 94.7646% |
+| Mean interval width | 331.2871 |
+
+The rolling result provides stronger evidence than a single holdout that the
+probabilistic intervals are generally conservative on this series. The RMSE
+variation across folds also shows that performance changes with the temporal
+regime. This is an initial rolling experiment: repeated seeds, fold-level
+calibration plots, comparisons against rolling classical baselines, and
+additional datasets are still needed before drawing broad conclusions.

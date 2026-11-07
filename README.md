@@ -368,6 +368,18 @@ python -m deepstoch rolling-hybrid data/demo_energy_demand.csv `
   --minimum-train 24 --test-size 4 --step 4 --json
 ```
 
+For the probabilistic neural state-space model, use `rolling-neural`:
+
+```powershell
+python -m deepstoch rolling-neural data/demo_energy_demand.csv `
+  --sequence-length 6 --minimum-train 120 --test-size 24 --step 24 `
+  --epochs 20 --patience 5 --json
+```
+
+Every neural fold is retrained from scratch. Feature and target normalization
+statistics are calculated inside that fold's training prefix, so future test
+observations cannot influence model fitting or scaling.
+
 The report includes fold count, mean RMSE, RMSE standard deviation, mean
 coverage, mean interval width, and fold-level results. This is the required
 structure for dissertation-scale temporal claims.
