@@ -5,6 +5,7 @@ import pytest
 
 from deepstoch.data.loader import load_csv
 from deepstoch.evaluation.calibration import summarize_calibration
+from deepstoch.visualization.calibration import render_calibration_svg
 from deepstoch.experiments.rolling import evaluate_repeated_rolling_neural_state, evaluate_rolling_ml_state, evaluate_rolling_neural_state
 
 
@@ -57,3 +58,14 @@ def test_calibration_summary_reports_signed_and_absolute_error() -> None:
     assert result.absolute_coverage_error == 0
     assert result.mean_interval_width == 15
     assert result.minimum_fold_coverage == 0.8
+
+
+def test_calibration_svg_contains_coverage_and_width_panels(tmp_path: Path) -> None:
+    destination = render_calibration_svg([
+        {"nominal_coverage": 0.9, "empirical_coverage": 0.88, "mean_interval_width": 10.0},
+        {"nominal_coverage": 0.9, "empirical_coverage": 0.94, "mean_interval_width": 12.0},
+    ], tmp_path / "calibration.svg")
+    content = destination.read_text(encoding="utf-8")
+    assert "Empirical coverage" in content
+    assert "Mean interval width" in content
+    assert "nominal 90%" in content

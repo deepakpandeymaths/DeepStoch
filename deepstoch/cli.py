@@ -23,6 +23,7 @@ from deepstoch.experiments.rolling import evaluate_repeated_rolling_neural_state
 from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
+from deepstoch.visualization.calibration import render_calibration_svg
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -112,6 +113,7 @@ def build_parser() -> argparse.ArgumentParser:
     repeated_neural.add_argument("--patience", type=int, default=5)
     repeated_neural.add_argument("--coverage", type=float, default=0.9)
     repeated_neural.add_argument("--seeds", default="42,43,44", help="Comma-separated unique random seeds.")
+    repeated_neural.add_argument("--plot-path", type=Path, help="Optional SVG calibration report path.")
     repeated_neural.add_argument("--json", action="store_true")
     neural_state = commands.add_parser("neural-state", help="Train the optional Phase 8 neural state-space model.")
     neural_state.add_argument("path", type=Path, help="Path to the CSV dataset.")
@@ -286,6 +288,9 @@ def main(argv: list[str] | None = None) -> int:
                 patience=args.patience,
                 nominal_coverage=args.coverage,
             )
+            if args.plot_path is not None:
+                fold_scores = [fold for summary in result.seed_summaries for fold in summary["fold_scores"]]
+                render_calibration_svg(fold_scores, args.plot_path)
         except (DataLoadError, KeyError, ValueError, RuntimeError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
@@ -302,6 +307,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"absolute coverage error: {result.calibration['absolute_coverage_error']:.2%}")
             print(f"fold coverage range: [{result.calibration['minimum_fold_coverage']:.2%}, {result.calibration['maximum_fold_coverage']:.2%}]")
             print(f"mean interval width: {result.mean_interval_width:.4f}")
+            if args.plot_path is not None:
+                print(f"calibration SVG: {args.plot_path}")
         return 0
     if args.command == "neural-state":
         try:
