@@ -56,10 +56,43 @@ python -m deepstoch compare data/demo_energy_demand.csv --test-size 8 --json
 To open the dashboard:
 
 ```powershell
+# Run this from the repository root: D:\Stochastic-Process-used-in-Software-reliability\DeepStoch
 python -m http.server 8000
 ```
 
-Open `http://localhost:8000/dashboard/` in a browser.
+Open either URL in a browser:
+
+```text
+http://127.0.0.1:8000/dashboard/index.html
+http://localhost:8000/dashboard/
+```
+
+If the page does not show, the most common cause is opening
+`dashboard/index.html` directly as a `file://` URL or starting the server from
+inside the `dashboard` folder. Start the server from the repository root and
+use one of the HTTP URLs above. Keep the PowerShell window running while using
+the dashboard; press `Ctrl+C` there to stop the server.
+
+### What the research dashboard currently shows
+
+The dashboard is a static, reproducible research snapshot rather than a
+hosted production application. It currently contains:
+
+- chronological model comparison for baseline, classical ML, state-space,
+  hybrid, and neural models;
+- uncertainty and simulation summary cards;
+- demo rolling-origin fold results;
+- real-world UCI Appliances neural calibration evidence;
+- mean RMSE, RMSE variation, empirical coverage, coverage error, and interval
+  width for the real-world rolling experiment;
+- an inline coverage-versus-fold and interval-width visualization;
+- project phase and dissertation roadmap status.
+
+The real-world panel is based on the documented 11-fold UCI Appliances neural
+experiment. The dashboard does not train models in the browser and does not
+automatically read local CSV files. Run the Python experiments separately,
+record their results, and then update the dashboard snapshot when a new
+frozen experiment is approved for presentation.
 
 ## Larger and real-world data
 

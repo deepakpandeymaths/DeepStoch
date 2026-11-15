@@ -26,3 +26,25 @@ fold. It is therefore an evidence viewer as well as a project-status prototype.
 The model table now contains the unified comparison across baselines, classical
 ML, state-space, hybrid, and neural models, including both point-error metrics
 and uncertainty metrics where available.
+
+## Current dashboard view
+
+The dashboard now includes a real-world evidence panel for the UCI Appliances
+neural state-space experiment. It displays the 11-fold rolling summary and an
+inline visual diagnostic with empirical coverage against the nominal 90% line,
+alongside mean interval width by fold.
+
+Run it from the repository root:
+
+```powershell
+python -m http.server 8000
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/dashboard/index.html
+```
+
+This is a static research snapshot. It is ready for demonstration and source
+control, but it is not yet a live experiment service or hosted deployment.
