@@ -25,6 +25,12 @@ const snapshot = {
     summary: [["Mean RMSE", "9.1505"], ["RMSE standard deviation", "7.2493"], ["Mean coverage", "95.83%"], ["Mean interval width", "74.3880"]],
     folds: [[21, 23.2248, "75.00%", 36.1335], [25, 12.9887, "100.00%", 86.6492], [29, 6.1640, "100.00%", 86.1735], [33, 1.3800, "100.00%", 82.5466], [37, 7.5218, "100.00%", 78.4465], [41, 3.6238, "100.00%", 76.3788]]
   },
+  realWorld: {
+    summary: [["Mean RMSE", "91.1869"], ["RMSE standard deviation", "23.5358"], ["Mean empirical coverage", "94.76%"], ["Absolute coverage error", "4.76%"], ["Mean interval width", "331.2871"]],
+    nominal: 0.90,
+    coverage: [0.8973, 0.9524, 0.9286, 0.9524, 0.9688, 0.9048, 0.9658, 0.9792, 0.9554, 0.9747, 0.9449],
+    widths: [338.49, 326.83, 345.13, 371.61, 299.28, 306.52, 337.52, 344.72, 367.87, 271.32, 334.86]
+  },
   roadmap: [
     ["0–6", "Foundation to simulation", "done"],
     ["7", "Dashboard", "next"],
@@ -44,9 +50,39 @@ function renderMetrics(id, metrics) {
 renderMetrics("uncertainty", snapshot.uncertainty);
 renderMetrics("simulation", snapshot.simulation);
 renderMetrics("rolling-summary", snapshot.rolling.summary);
+renderMetrics("real-world-summary", snapshot.realWorld.summary);
 document.querySelector("#rolling-table").innerHTML = snapshot.rolling.folds.map((fold, index) => `
   <tr><td>${index + 1}</td><td>${fold[0]}</td><td>${fold[1].toFixed(4)}</td><td>${fold[2]}</td><td>${fold[3].toFixed(4)}</td></tr>
 `).join("");
 document.querySelector("#roadmap").innerHTML = snapshot.roadmap.map(([phase, title, status]) => `
   <div class="milestone ${status}"><b><span class="dot"></span>Phase ${phase}</b><small>${title}</small></div>
 `).join("");
+
+function renderCalibrationChart(target, calibration) {
+  const width = 960;
+  const height = 250;
+  const left = 48;
+  const right = 20;
+  const top = 22;
+  const bottom = 34;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const x = index => left + (index / Math.max(1, calibration.coverage.length - 1)) * plotWidth;
+  const yCoverage = value => top + (1 - value) * plotHeight;
+  const widthMin = Math.min(...calibration.widths);
+  const widthMax = Math.max(...calibration.widths);
+  const yWidth = value => top + plotHeight + 55 + (1 - (value - widthMin) / Math.max(1, widthMax - widthMin)) * 70;
+  const coveragePoints = calibration.coverage.map((value, index) => `${x(index).toFixed(1)},${yCoverage(value).toFixed(1)}`).join(" ");
+  const widthPoints = calibration.widths.map((value, index) => `${x(index).toFixed(1)},${yWidth(value).toFixed(1)}`).join(" ");
+  const nominalY = yCoverage(calibration.nominal);
+  target.innerHTML = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+    <rect class="chart-bg" x="0" y="0" width="${width}" height="${height}" rx="12"/>
+    <text class="chart-title" x="${left}" y="15">Coverage by fold</text>
+    <line class="nominal-line" x1="${left}" y1="${nominalY}" x2="${width - right}" y2="${nominalY}"/>
+    <polyline class="coverage-line" points="${coveragePoints}"/>
+    <text class="chart-label" x="${width - right}" y="${nominalY - 6}" text-anchor="end">Nominal 90%</text>
+    <text class="chart-title" x="${left}" y="${height - 8}">Mean interval width</text>
+    <polyline class="width-line" points="${widthPoints}"/>
+  </svg>`;
+}
+renderCalibrationChart(document.querySelector("#calibration-chart"), snapshot.realWorld);

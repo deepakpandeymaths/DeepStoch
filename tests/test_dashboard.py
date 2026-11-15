@@ -18,6 +18,8 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "Rolling-origin evaluation" in html
     assert "rolling-summary" in script
     assert "RMSE standard deviation" in script
+    assert "real-world-summary" in script
+    assert "calibration-chart" in script
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

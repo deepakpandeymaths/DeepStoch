@@ -19,7 +19,7 @@
   <main class="container">
     <section class="grid cards" aria-label="Project summary">
       <article class="card"><span class="label">Current phase</span><strong id="current-phase">Dashboard</strong><small>Browser workflow foundation</small></article>
-      <article class="card"><span class="label">Tests</span><strong id="test-count">19 passed</strong><small>Latest local verification</small></article>
+      <article class="card"><span class="label">Tests</span><strong id="test-count">40 passed</strong><small>Latest local verification</small></article>
       <article class="card"><span class="label">License</span><strong>GPL-3.0+</strong><small>Open research software</small></article>
       <article class="card"><span class="label">Data mode</span><strong>Demo dataset</strong><small>Energy-demand example</small></article>
     </section>
@@ -35,6 +35,8 @@
     </section>
 
     <section class="panel"><div class="section-heading"><div><p class="eyebrow">ROBUSTNESS</p><h2>Rolling-origin evaluation</h2></div><span class="muted">Six chronological folds</span></div><div id="rolling-summary" class="metric-list"></div><div class="table-wrap"><table><thead><tr><th>Fold</th><th>Train size</th><th>RMSE</th><th>Coverage</th><th>Width</th></tr></thead><tbody id="rolling-table"></tbody></table></div></section>
+
+    <section class="panel real-world-panel"><div class="section-heading"><div><p class="eyebrow">REAL-WORLD EVIDENCE</p><h2>UCI Appliances neural calibration</h2></div><span class="muted">11 chronological folds</span></div><div id="real-world-summary" class="metric-list"></div><div id="calibration-chart" class="calibration-chart" role="img" aria-label="Empirical coverage and interval width across real-world rolling folds"></div><p class="note">Initial research snapshot: nominal coverage is 90%. Coverage and interval width are evaluated on future blocks after fold-specific retraining.</p></section>
 
     <section class="panel"><div class="section-heading"><div><p class="eyebrow">DEVELOPMENT</p><h2>Roadmap status</h2></div></div><div id="roadmap" class="roadmap"></div></section>
 
