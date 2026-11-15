@@ -19,6 +19,12 @@
       <a href="#evidence"><span>◌</span> Evidence</a>
       <a href="#roadmap-section"><span>▱</span> Roadmap</a>
     </nav>
+    <div class="api-connection">
+      <small>LOCAL API</small>
+      <input id="api-url" value="http://127.0.0.1:8001" aria-label="Local API URL">
+      <button id="api-connect" type="button">Connect</button>
+      <span id="api-status" class="api-status">Snapshot mode</span>
+    </div>
     <div class="side-footer"><span class="badge">Phase 8 research</span><small>Local prototype · GPL-3.0+</small></div>
   </header>
 
@@ -54,7 +60,7 @@
       <article class="card"><span class="label">Current phase</span><strong id="current-phase">Dashboard</strong><small>Browser workflow foundation</small></article>
       <article class="card"><span class="label">Tests</span><strong id="test-count">40 passed</strong><small>Latest local verification</small></article>
       <article class="card"><span class="label">License</span><strong>GPL-3.0+</strong><small>Open research software</small></article>
-      <article class="card"><span class="label">Data mode</span><strong>Demo dataset</strong><small>Energy-demand example</small></article>
+      <article class="card"><span class="label">Data mode</span><strong id="data-mode">Snapshot</strong><small>Local API available on demand</small></article>
     </section>
 
     <section id="evidence" class="panel">

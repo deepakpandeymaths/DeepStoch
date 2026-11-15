@@ -78,9 +78,48 @@ document.querySelectorAll("#chat-suggestions button").forEach(button => button.a
 document.querySelector("#chat-form").addEventListener("submit", event => { event.preventDefault(); askCopilot(document.querySelector("#chat-input").value); });
 addChatMessage("assistant", "Welcome. I can explain what DeepStoch is building, why uncertainty matters, what the current real-world numbers mean, and what comes next.");
 
-document.querySelector("#model-table").innerHTML = snapshot.models.map(model => `
-  <tr><td><strong>${model.name}</strong></td><td>${model.mae.toFixed(4)}</td><td>${model.rmse.toFixed(4)}</td><td>${model.mape === null ? "—" : model.mape.toFixed(2) + "%"}</td><td>${model.coverage ?? "—"}</td><td>${model.width === null ? "—" : model.width.toFixed(4)}</td><td class="status">${model.status}</td></tr>
-`).join("");
+function friendlyModelName(name) {
+  return {
+    linear_regression: "Linear regression",
+    random_forest: "Random Forest",
+    linear_ml_plus_residual_state: "Linear ML + residual state",
+    local_level_state_space: "Local-level state-space",
+    local_linear_trend_state_space: "Local-linear-trend state-space",
+    neural_state_space: "Neural state-space"
+  }[name] || name.replaceAll("_", " ");
+}
+
+function renderModels(models) {
+  document.querySelector("#model-table").innerHTML = models.map(model => `
+    <tr><td><strong>${model.name}</strong></td><td>${model.mae === null ? "—" : Number(model.mae).toFixed(4)}</td><td>${model.rmse === null ? "—" : Number(model.rmse).toFixed(4)}</td><td>${model.mape === null ? "—" : Number(model.mape).toFixed(2) + "%"}</td><td>${model.coverage === null || model.coverage === undefined ? "—" : (typeof model.coverage === "number" ? (model.coverage * 100).toFixed(2) + "%" : model.coverage)}</td><td>${model.width === null || model.width === undefined ? "—" : Number(model.width).toFixed(4)}</td><td class="status">${model.status}</td></tr>
+  `).join("");
+}
+renderModels(snapshot.models);
+
+async function connectLocalApi() {
+  const base = document.querySelector("#api-url").value.trim().replace(/\/$/, "");
+  const status = document.querySelector("#api-status");
+  const button = document.querySelector("#api-connect");
+  button.disabled = true;
+  status.textContent = "Connecting…";
+  try {
+    const health = await fetch(`${base}/health`);
+    if (!health.ok) throw new Error("health check failed");
+    const response = await fetch(`${base}/models/compare?path=${encodeURIComponent("data/demo_energy_demand.csv")}&test_size=8`);
+    if (!response.ok) throw new Error("comparison request failed");
+    const payload = await response.json();
+    renderModels(payload.models.map(model => ({ ...model, name: friendlyModelName(model.model), width: model.interval_width, status: "Live API" })));
+    document.querySelector("#data-mode").textContent = "Live API";
+    status.textContent = "Connected";
+    status.className = "api-status connected";
+  } catch (error) {
+    status.textContent = "Snapshot mode";
+    status.className = "api-status error";
+  } finally {
+    button.disabled = false;
+  }
+}
+document.querySelector("#api-connect").addEventListener("click", connectLocalApi);
 
 function renderMetrics(id, metrics) {
   document.querySelector(`#${id}`).innerHTML = metrics.map(([label, value]) => `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join("");

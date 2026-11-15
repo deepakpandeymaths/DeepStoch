@@ -9,12 +9,19 @@ def create_app():
     """Create the local API app; FastAPI remains an optional dependency."""
     try:
         from fastapi import FastAPI, HTTPException, Query
+        from fastapi.middleware.cors import CORSMiddleware
     except ImportError as exc:
         raise RuntimeError("API support requires pip install -e '.[api]'") from exc
 
     from deepstoch.api.service import dataset_summary, model_comparison
 
     app = FastAPI(title="DeepStoch Local Experiment API", version="0.1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
+        allow_methods=["GET"],
+        allow_headers=["*"],
+    )
 
     @app.get("/health")
     def health() -> dict[str, str]:

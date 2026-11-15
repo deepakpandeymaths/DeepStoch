@@ -188,6 +188,12 @@ The dashboard connection is the next Phase 8 milestone. Until then, the
 dashboard remains a reproducible static snapshot and the API can be tested
 independently.
 
+When both services are running, open the dashboard and press `Connect` in the
+left sidebar. The dashboard checks `/health`, requests the demo comparison from
+`/models/compare`, and replaces the model table with live local API results.
+If the API is unavailable, it remains in `Snapshot mode` and the documented
+static evidence stays visible.
+
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation
 dashboard/       Static research dashboard prototype
