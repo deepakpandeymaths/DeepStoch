@@ -27,6 +27,8 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "new-chat" in html
     assert "api-connect" in html
     assert "fetch(" in script
+    assert "evidence-drawer" in html
+    assert "Research evidence" in html
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

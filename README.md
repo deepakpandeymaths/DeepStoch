@@ -94,6 +94,12 @@ scrollable evidence sections. This keeps the explanatory conversation visible
 without forcing the user to read the entire research report before asking a
 question.
 
+The detailed model tables, uncertainty metrics, simulations, rolling folds,
+real-world calibration chart, and roadmap are grouped inside a collapsed
+`Research evidence` drawer. Open that drawer when you want the dissertation
+evidence; leave it closed when using the dashboard as a conversational project
+workspace.
+
 The real-world panel is based on the documented 11-fold UCI Appliances neural
 experiment. The dashboard does not train models in the browser and does not
 automatically read local CSV files. Run the Python experiments separately,
