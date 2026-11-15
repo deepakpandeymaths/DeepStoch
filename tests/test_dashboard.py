@@ -23,6 +23,8 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "DeepStoch Research Copilot" in html
     assert "answerCopilot" in script
     assert "purpose-panel" in html
+    assert "side-nav" in html
+    assert "new-chat" in html
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

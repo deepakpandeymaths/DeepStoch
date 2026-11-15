@@ -8,16 +8,22 @@
 </head>
 <body>
   <header class="hero">
-    <div>
-      <p class="eyebrow">RESEARCH SOFTWARE PLATFORM</p>
-      <h1>DeepStoch</h1>
-      <p class="subtitle">Uncertainty-aware deep learning and stochastic modelling</p>
+    <div class="brand-block">
+      <div class="brand-mark">D</div>
+      <div><h1>DeepStoch</h1><p class="subtitle">Research workspace</p></div>
     </div>
-    <span class="badge">Phase 7 prototype</span>
+    <button class="new-chat" type="button" onclick="document.querySelector('#chat-input').focus()">＋ New question</button>
+    <nav class="side-nav" aria-label="Dashboard sections">
+      <a href="#copilot"><span>✦</span> Research Copilot</a>
+      <a href="#overview"><span>◈</span> Overview</a>
+      <a href="#evidence"><span>◌</span> Evidence</a>
+      <a href="#roadmap-section"><span>▱</span> Roadmap</a>
+    </nav>
+    <div class="side-footer"><span class="badge">Phase 8 research</span><small>Local prototype · GPL-3.0+</small></div>
   </header>
 
   <main class="container">
-    <section class="purpose-panel">
+    <section id="overview" class="purpose-panel">
       <div class="purpose-copy">
         <p class="eyebrow">WHAT DEEPSTOCH DOES</p>
         <h2>Forecast the future, measure uncertainty, and test whether the uncertainty is trustworthy.</h2>
@@ -31,7 +37,7 @@
       </div>
     </section>
 
-    <section class="copilot-panel" aria-label="DeepStoch Research Copilot">
+    <section id="copilot" class="copilot-panel" aria-label="DeepStoch Research Copilot">
       <div class="section-heading"><div><p class="eyebrow">GUIDED EXPLANATION</p><h2>DeepStoch Research Copilot</h2></div><span class="copilot-status">Local research assistant</span></div>
       <p class="copilot-intro">Ask what the project means, what the current numbers show, or what should be built next. This prototype answers from the dashboard’s documented experiment snapshot.</p>
       <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
@@ -51,7 +57,7 @@
       <article class="card"><span class="label">Data mode</span><strong>Demo dataset</strong><small>Energy-demand example</small></article>
     </section>
 
-    <section class="panel">
+    <section id="evidence" class="panel">
       <div class="section-heading"><div><p class="eyebrow">MODEL EVALUATION</p><h2>Forecast comparison</h2></div><span class="muted">Chronological holdout</span></div>
       <div class="table-wrap"><table><thead><tr><th>Model</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>Coverage</th><th>Width</th><th>Status</th></tr></thead><tbody id="model-table"></tbody></table></div>
     </section>
@@ -65,7 +71,7 @@
 
     <section class="panel real-world-panel"><div class="section-heading"><div><p class="eyebrow">REAL-WORLD EVIDENCE</p><h2>UCI Appliances neural calibration</h2></div><span class="muted">11 chronological folds</span></div><div id="real-world-summary" class="metric-list"></div><div id="calibration-chart" class="calibration-chart" role="img" aria-label="Empirical coverage and interval width across real-world rolling folds"></div><p class="note">Initial research snapshot: nominal coverage is 90%. Coverage and interval width are evaluated on future blocks after fold-specific retraining.</p></section>
 
-    <section class="panel"><div class="section-heading"><div><p class="eyebrow">DEVELOPMENT</p><h2>Roadmap status</h2></div></div><div id="roadmap" class="roadmap"></div></section>
+    <section id="roadmap-section" class="panel"><div class="section-heading"><div><p class="eyebrow">DEVELOPMENT</p><h2>Roadmap status</h2></div></div><div id="roadmap" class="roadmap"></div></section>
 
     <footer><span>DeepStoch research dashboard prototype</span><span>Data shown is a reproducible demo snapshot, not a production forecast.</span></footer>
   </main>

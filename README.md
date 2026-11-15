@@ -88,6 +88,12 @@ hosted production application. It currently contains:
 - an inline coverage-versus-fold and interval-width visualization;
 - project phase and dissertation roadmap status.
 
+The interface uses a compact Codex/ChatGPT-style workspace layout: a dark
+project sidebar, focused Copilot conversation, compact summary cards, and
+scrollable evidence sections. This keeps the explanatory conversation visible
+without forcing the user to read the entire research report before asking a
+question.
+
 The real-world panel is based on the documented 11-fold UCI Appliances neural
 experiment. The dashboard does not train models in the browser and does not
 automatically read local CSV files. Run the Python experiments separately,
