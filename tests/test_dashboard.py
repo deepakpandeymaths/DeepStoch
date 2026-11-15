@@ -29,6 +29,9 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "fetch(" in script
     assert "evidence-drawer" in html
     assert "Research evidence" in html
+    assert "run-comparison" in html
+    assert "dataset-path" in html
+    assert "dataset/summary" in script
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

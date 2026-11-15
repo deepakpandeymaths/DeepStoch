@@ -98,28 +98,56 @@ renderModels(snapshot.models);
 
 async function connectLocalApi() {
   const base = document.querySelector("#api-url").value.trim().replace(/\/$/, "");
+  await runComparison(base);
+}
+
+async function runComparison(baseOverride = null) {
+  const base = (baseOverride || document.querySelector("#api-url").value.trim()).replace(/\/$/, "");
   const status = document.querySelector("#api-status");
   const button = document.querySelector("#api-connect");
+  const runButton = document.querySelector("#run-comparison");
+  const runStatus = document.querySelector("#run-status");
+  const path = document.querySelector("#dataset-path").value.trim();
+  const target = document.querySelector("#target-column").value.trim() || "target";
+  const time = document.querySelector("#time-column").value.trim() || "timestamp";
+  const testSize = Number(document.querySelector("#test-size").value);
+  if (!path || !Number.isInteger(testSize) || testSize < 1) {
+    runStatus.textContent = "Enter a dataset path and a positive test size.";
+    return;
+  }
   button.disabled = true;
+  runButton.disabled = true;
   status.textContent = "Connecting…";
+  runStatus.textContent = "Validating dataset and running comparison…";
   try {
     const health = await fetch(`${base}/health`);
     if (!health.ok) throw new Error("health check failed");
-    const response = await fetch(`${base}/models/compare?path=${encodeURIComponent("data/demo_energy_demand.csv")}&test_size=8`);
+    const summaryResponse = await fetch(`${base}/dataset/summary?path=${encodeURIComponent(path)}&target_column=${encodeURIComponent(target)}&time_column=${encodeURIComponent(time)}`);
+    if (!summaryResponse.ok) throw new Error("dataset validation request failed");
+    const summary = await summaryResponse.json();
+    if (!summary.validation.valid) throw new Error(summary.validation.errors.join("; "));
+    const response = await fetch(`${base}/models/compare?path=${encodeURIComponent(path)}&target_column=${encodeURIComponent(target)}&time_column=${encodeURIComponent(time)}&test_size=${testSize}`);
     if (!response.ok) throw new Error("comparison request failed");
     const payload = await response.json();
     renderModels(payload.models.map(model => ({ ...model, name: friendlyModelName(model.model), width: model.interval_width, status: "Live API" })));
     document.querySelector("#data-mode").textContent = "Live API";
     status.textContent = "Connected";
     status.className = "api-status connected";
+    const split = summary.split;
+    document.querySelector("#run-status").textContent = "Comparison complete";
+    document.querySelector("#run-summary").textContent = `${summary.rows} rows validated · ${split.train} train · ${split.validation} validation · ${split.test} test · ${payload.models.length} models compared.`;
   } catch (error) {
     status.textContent = "Snapshot mode";
     status.className = "api-status error";
+    runStatus.textContent = "Run failed";
+    document.querySelector("#run-summary").textContent = `${error.message}. The snapshot remains visible.`;
   } finally {
     button.disabled = false;
+    runButton.disabled = false;
   }
 }
 document.querySelector("#api-connect").addEventListener("click", connectLocalApi);
+document.querySelector("#run-comparison").addEventListener("click", () => runComparison());
 
 function renderMetrics(id, metrics) {
   document.querySelector(`#${id}`).innerHTML = metrics.map(([label, value]) => `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join("");

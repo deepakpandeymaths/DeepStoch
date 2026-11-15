@@ -63,6 +63,18 @@
       <article class="card"><span class="label">Data mode</span><strong id="data-mode">Snapshot</strong><small>Local API available on demand</small></article>
     </section>
 
+    <section class="run-panel" aria-label="Live experiment controls">
+      <div class="section-heading"><div><p class="eyebrow">LIVE EXPERIMENT</p><h2>Run a local comparison</h2></div><span id="run-status" class="muted">Waiting for input</span></div>
+      <div class="run-controls">
+        <label>CSV path<input id="dataset-path" value="data/demo_energy_demand.csv" /></label>
+        <label>Target column<input id="target-column" value="target" /></label>
+        <label>Time column<input id="time-column" value="timestamp" /></label>
+        <label>Test size<input id="test-size" type="number" min="1" value="8" /></label>
+        <button id="run-comparison" type="button">Run comparison</button>
+      </div>
+      <div id="run-summary" class="run-summary">The static snapshot is currently displayed. Start the local API and run a dataset to replace it with live results.</div>
+    </section>
+
     <details id="evidence" class="evidence-drawer">
       <summary><span><strong>Research evidence</strong><small>Model comparison, uncertainty, simulation, rolling validation, and roadmap</small></span><b>Open</b></summary>
       <div class="evidence-content">

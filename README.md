@@ -200,6 +200,25 @@ left sidebar. The dashboard checks `/health`, requests the demo comparison from
 If the API is unavailable, it remains in `Snapshot mode` and the documented
 static evidence stays visible.
 
+The live experiment panel also accepts a CSV path, target column, timestamp
+column, and test size. Press `Run comparison` to validate that dataset and
+request a fresh chronological model comparison. For example, from the
+repository root use:
+
+```text
+data/demo_energy_demand.csv
+```
+
+For a local real-world file, enter its path as visible to the API process, for
+example:
+
+```text
+data/real_world/uci_appliances.csv
+```
+
+The browser displays the returned row count and train/validation/test split,
+and keeps the last static or successful result visible if a run fails.
+
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation
 dashboard/       Static research dashboard prototype
