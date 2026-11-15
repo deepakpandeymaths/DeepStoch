@@ -20,6 +20,9 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "RMSE standard deviation" in script
     assert "real-world-summary" in script
     assert "calibration-chart" in script
+    assert "DeepStoch Research Copilot" in html
+    assert "answerCopilot" in script
+    assert "purpose-panel" in html
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

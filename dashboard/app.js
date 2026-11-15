@@ -40,6 +40,44 @@ const snapshot = {
   ]
 };
 
+const copilotAnswers = [
+  { keys: ["what is deepstoch", "purpose", "meaning", "do"], answer: "DeepStoch is a research platform for forecasting time-series data under uncertainty. It learns a likely future value, produces an interval around that forecast, simulates plausible future paths, and checks the interval on future observations. The research goal is calibrated forecasting—not just a low error score." },
+  { keys: ["uncertainty", "interval", "trust", "coverage"], answer: "A point forecast can say 620, but it does not say how risky that estimate is. DeepStoch adds a prediction interval such as [580, 665]. Coverage asks how often future observations actually fall inside those intervals. The current real-world neural experiment achieved 94.76% mean empirical coverage against a 90% nominal target across 11 chronological folds." },
+  { keys: ["model", "neural", "gru", "machine learning"], answer: "DeepStoch compares several families: transparent baselines, linear regression, Random Forest, local-level and local-trend state-space models, an ML-plus-residual-state hybrid, and a probabilistic GRU neural state-space model. A model is not accepted as better merely because it is deep; it must be compared on accuracy, coverage, interval width, stability, and computational cost." },
+  { keys: ["real world", "appliances", "dataset"], answer: "The first real-world experiment uses the UCI Appliances Energy Prediction series. The neural model was retrained chronologically at 11 origins. Across those folds, mean RMSE was 91.1869, mean empirical coverage was 94.76%, and mean interval width was 331.2871. These are research measurements, not universal performance guarantees." },
+  { keys: ["next", "future", "build", "roadmap"], answer: "The next research steps are to compare all model families under the same rolling protocol, add calibration-versus-width plots, run ablations, repeat across additional domains, and freeze reproducible experiment configurations for the dissertation. The chatbot interface is currently a local explanatory layer; a live LLM service can be added after the experiment API is stable." },
+  { keys: ["chatbot", "llm", "ai"], answer: "The current Copilot is intentionally rule-based and local. It explains the documented DeepStoch snapshot without sending your data to an external service. Later, we can connect an LLM through a controlled backend that receives only approved experiment summaries and cites the underlying metrics." }
+];
+
+function answerCopilot(question) {
+  const normalized = question.toLowerCase();
+  const match = copilotAnswers.find(item => item.keys.some(key => normalized.includes(key)));
+  return match ? match.answer : "DeepStoch is building a trustworthy forecasting workflow: compare models, quantify uncertainty, test calibration on future data, and document the evidence. Try asking about the purpose, uncertainty, neural model, real-world experiment, or next steps.";
+}
+
+function addChatMessage(role, text) {
+  const messages = document.querySelector("#chat-messages");
+  const bubble = document.createElement("div");
+  bubble.className = `chat-message ${role}`;
+  bubble.innerHTML = `<span class="chat-role">${role === "assistant" ? "DeepStoch Copilot" : "You"}</span><p>${text}</p>`;
+  messages.appendChild(bubble);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function askCopilot(question) {
+  const cleaned = question.trim();
+  if (!cleaned) return;
+  addChatMessage("user", cleaned);
+  addChatMessage("assistant", answerCopilot(cleaned));
+  document.querySelector("#chat-input").value = "";
+}
+
+const suggestions = ["What is the purpose of DeepStoch?", "Why do we need uncertainty?", "What do the real-world results mean?", "What should we build next?"];
+document.querySelector("#chat-suggestions").innerHTML = suggestions.map(question => `<button type="button" data-question="${question}">${question}</button>`).join("");
+document.querySelectorAll("#chat-suggestions button").forEach(button => button.addEventListener("click", () => askCopilot(button.dataset.question)));
+document.querySelector("#chat-form").addEventListener("submit", event => { event.preventDefault(); askCopilot(document.querySelector("#chat-input").value); });
+addChatMessage("assistant", "Welcome. I can explain what DeepStoch is building, why uncertainty matters, what the current real-world numbers mean, and what comes next.");
+
 document.querySelector("#model-table").innerHTML = snapshot.models.map(model => `
   <tr><td><strong>${model.name}</strong></td><td>${model.mae.toFixed(4)}</td><td>${model.rmse.toFixed(4)}</td><td>${model.mape === null ? "—" : model.mape.toFixed(2) + "%"}</td><td>${model.coverage ?? "—"}</td><td>${model.width === null ? "—" : model.width.toFixed(4)}</td><td class="status">${model.status}</td></tr>
 `).join("");

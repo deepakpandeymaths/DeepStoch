@@ -94,6 +94,50 @@ automatically read local CSV files. Run the Python experiments separately,
 record their results, and then update the dashboard snapshot when a new
 frozen experiment is approved for presentation.
 
+### Understanding the dashboard purpose
+
+The dashboard is organized around one research question:
+
+> Can a forecasting model make useful predictions and honestly communicate
+> how uncertain those predictions are?
+
+The workflow is:
+
+```text
+time-series data
+      ↓
+validated chronological input
+      ↓
+baseline, ML, neural, stochastic, and hybrid forecasts
+      ↓
+prediction intervals and simulated future paths
+      ↓
+rolling future-block evaluation
+      ↓
+accuracy + coverage + interval width + calibration evidence
+```
+
+The dashboard is therefore an evidence viewer for the dissertation software.
+It is not intended to be only a chart gallery, and it is not a chatbot that
+automatically invents scientific conclusions.
+
+### Research Copilot
+
+The dashboard includes a local, rule-based **DeepStoch Research Copilot**. It
+answers guided questions such as:
+
+- What is the purpose of DeepStoch?
+- Why do we need uncertainty intervals?
+- What do the real-world results mean?
+- What should we build next?
+- Is the current chatbot an LLM?
+
+This first Copilot version runs entirely in the browser from the documented
+experiment snapshot. It does not send data to an external AI provider and is
+not yet a general-purpose LLM. A future backend can connect an LLM to approved
+experiment summaries after the experiment API, provenance rules, and safety
+boundaries are stable.
+
 ## Larger and real-world data
 
 Generate a deterministic synthetic stress-test dataset:
