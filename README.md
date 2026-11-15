@@ -157,6 +157,37 @@ This data is explicitly synthetic and must not be presented as real-world eviden
 
 ## Repository layout
 
+## Phase 8 local experiment API
+
+Phase 8 includes a dependency-light service layer and an optional FastAPI
+adapter. This API is local and read-only in the first milestone: it summarizes
+a CSV dataset and returns the unified chronological model comparison for the
+dashboard. It does not upload data, retrain models, or expose a public server.
+
+Install the optional API dependencies:
+
+```powershell
+python -m pip install -e ".[api]"
+```
+
+Start the local API from the repository root:
+
+```powershell
+uvicorn deepstoch.api.app:create_app --factory --reload --host 127.0.0.1 --port 8001
+```
+
+Useful endpoints:
+
+```text
+http://127.0.0.1:8001/health
+http://127.0.0.1:8001/dataset/summary?path=D:/Stochastic-Process-used-in-Software-reliability/DeepStoch/data/demo_energy_demand.csv
+http://127.0.0.1:8001/models/compare?path=D:/Stochastic-Process-used-in-Software-reliability/DeepStoch/data/demo_energy_demand.csv&test_size=8
+```
+
+The dashboard connection is the next Phase 8 milestone. Until then, the
+dashboard remains a reproducible static snapshot and the API can be tested
+independently.
+
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation
 dashboard/       Static research dashboard prototype

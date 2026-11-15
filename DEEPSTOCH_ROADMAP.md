@@ -24,7 +24,7 @@ The first release will accept a time-series dataset, validate and preprocess it,
 | 5. Uncertainty | Completed | Conformal intervals, neural predictive intervals, calibration reports |
 | 6. Simulation | Completed | Bootstrap trajectories and threshold probabilities |
 | 7. Dashboard | Completed | Browser dashboard with model and robustness evidence |
-| 8. Hybrid research | In progress | State-space, ML-state hybrid, rolling evaluation, neural state-space, real-world folds, seed stability |
+| 8. Hybrid research | In progress | State-space, ML-state hybrid, rolling evaluation, neural state-space, seed stability, local experiment API |
 | 9. Dissertation release | Pending | Real-world studies, final tables, user manual, and release archive |
 
 ## Model progression
@@ -74,7 +74,7 @@ Browser workflow, model comparison, rolling evidence, uncertainty summaries, sim
 
 ### Phase 8 - Hybrid research
 
-Local-level and local-trend state-space models, ML-plus-residual-state correction, rolling-origin evaluation, neural state-space training, checkpoint inference, and neural-SDE prototypes.
+Local-level and local-trend state-space models, ML-plus-residual-state correction, rolling-origin evaluation, neural state-space training, checkpoint inference, calibration diagnostics, repeated seeds, and the read-only local experiment API. Neural-SDE prototypes remain future work.
 
 ### Phase 9 - Dissertation release
 

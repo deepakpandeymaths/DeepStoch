@@ -27,3 +27,21 @@ This is an interpretable stochastic baseline for future hybrid models. The next
 research steps are to combine learned features with latent states, add seasonal
 and regime-switching transitions, and prototype optional neural state-space and
 neural stochastic differential-equation models.
+
+## Local experiment API milestone
+
+Phase 8 now also contains a read-only service layer in `deepstoch/api/service.py`
+and an optional FastAPI adapter in `deepstoch/api/app.py`. It exposes dataset
+validation summaries and the unified chronological model comparison to local
+interfaces such as the research dashboard.
+
+Install and run the optional adapter:
+
+```powershell
+python -m pip install -e ".[api]"
+uvicorn deepstoch.api.app:create_app --factory --host 127.0.0.1 --port 8001
+```
+
+The first API milestone deliberately does not upload data, train models, or
+publish a public endpoint. The next milestone is connecting the dashboard and
+Research Copilot to these local read-only results.
