@@ -237,6 +237,11 @@ number of models, best model, RMSE, coverage, simulation horizon, and path
 count. The history is limited to the latest ten local runs and can be cleared
 with the `Clear history` control. No run history is uploaded by this feature.
 
+Two saved runs can also be selected for a side-by-side comparison. The
+comparison shows dataset path, best model, best RMSE, empirical coverage,
+simulation path count, and simulation horizon, making it easier to track
+whether a model or calibration result changed between experiments.
+
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation
 dashboard/       Static research dashboard prototype

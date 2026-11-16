@@ -50,6 +50,9 @@ function readRunHistory() {
 function renderRunHistory() {
   const history = readRunHistory();
   const target = document.querySelector("#run-history");
+  const options = '<option value="">Select a run</option>' + history.map((run, index) => `<option value="${index}">${run.timestamp} · ${run.bestModel}</option>`).join("");
+  document.querySelector("#history-run-a").innerHTML = options;
+  document.querySelector("#history-run-b").innerHTML = options;
   if (!history.length) { target.innerHTML = '<span class="muted">No live runs saved yet.</span>'; return; }
   target.innerHTML = history.slice(0, 5).map(run => `<article class="history-row"><div><strong>${run.path}</strong><small>${run.timestamp} · ${run.rows} rows · ${run.models} models</small></div><span>${run.coverage} coverage<br>${run.bestModel}</span></article>`).join("");
 }
@@ -197,6 +200,15 @@ async function runComparison(baseOverride = null) {
 document.querySelector("#api-connect").addEventListener("click", connectLocalApi);
 document.querySelector("#run-comparison").addEventListener("click", () => runComparison());
 document.querySelector("#clear-history").addEventListener("click", () => { localStorage.removeItem(HISTORY_KEY); renderRunHistory(); });
+document.querySelector("#compare-history").addEventListener("click", () => {
+  const history = readRunHistory();
+  const first = document.querySelector("#history-run-a").value;
+  const second = document.querySelector("#history-run-b").value;
+  const target = document.querySelector("#history-comparison");
+  if (first === "" || second === "" || first === second) { target.innerHTML = '<span class="muted">Select two different saved runs.</span>'; return; }
+  const runs = [history[Number(first)], history[Number(second)]];
+  target.innerHTML = `<div class="comparison-grid">${runs.map((run, index) => `<article><strong>Run ${index === 0 ? "A" : "B"}</strong><small>${run.timestamp}<br>${run.path}</small><span>Best model: <b>${run.bestModel}</b></span><span>RMSE: <b>${run.rmse}</b></span><span>Coverage: <b>${run.coverage}</b></span><span>Simulation: <b>${run.paths} paths · ${run.horizon} steps</b></span></article>`).join("")}</div>`;
+});
 renderRunHistory();
 
 function renderMetrics(id, metrics) {

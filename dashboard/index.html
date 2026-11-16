@@ -78,6 +78,12 @@
       <div id="run-summary" class="run-summary">The static snapshot is currently displayed. Start the local API and run a dataset to replace it with live results.</div>
       <div class="history-heading"><strong>Recent local runs</strong><button id="clear-history" type="button">Clear history</button></div>
       <div id="run-history" class="run-history"><span class="muted">No live runs saved yet.</span></div>
+      <div class="history-compare">
+        <label>Compare run A<select id="history-run-a"><option value="">Select a run</option></select></label>
+        <label>Compare run B<select id="history-run-b"><option value="">Select a run</option></select></label>
+        <button id="compare-history" type="button">Compare runs</button>
+      </div>
+      <div id="history-comparison" class="history-comparison"><span class="muted">Select two saved runs to compare them.</span></div>
     </section>
 
     <details id="evidence" class="evidence-drawer">

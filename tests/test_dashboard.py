@@ -39,6 +39,9 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "Live run complete" in script
     assert "runHistory" in script
     assert "run-history" in html
+    assert "compare-history" in html
+    assert "history-run-a" in html
+    assert "comparison-grid" in script
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:
