@@ -13,7 +13,7 @@ def create_app():
     except ImportError as exc:
         raise RuntimeError("API support requires pip install -e '.[api]'") from exc
 
-    from deepstoch.api.service import dataset_summary, model_comparison, uncertainty_report
+    from deepstoch.api.service import dataset_summary, model_comparison, simulation_report, uncertainty_report
 
     app = FastAPI(title="DeepStoch Local Experiment API", version="0.1.0")
     app.add_middleware(
@@ -57,6 +57,20 @@ def create_app():
     ) -> dict[str, object]:
         try:
             return uncertainty_report(Path(path), time_column=time_column, target_column=target_column, calibration_size=calibration_size, test_size=test_size, coverage=coverage)
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/simulation/report")
+    def simulation(
+        path: str,
+        target_column: str = "target",
+        horizon: int = Query(default=24, ge=1, le=1000),
+        paths: int = Query(default=1000, ge=1, le=100000),
+        seed: int = 42,
+        threshold: float | None = None,
+    ) -> dict[str, object]:
+        try:
+            return simulation_report(Path(path), target_column=target_column, horizon=horizon, paths=paths, seed=seed, threshold=threshold)
         except (FileNotFoundError, ValueError, KeyError) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 

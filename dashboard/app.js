@@ -111,8 +111,12 @@ async function runComparison(baseOverride = null) {
   const target = document.querySelector("#target-column").value.trim() || "target";
   const time = document.querySelector("#time-column").value.trim() || "timestamp";
   const testSize = Number(document.querySelector("#test-size").value);
-  if (!path || !Number.isInteger(testSize) || testSize < 1) {
-    runStatus.textContent = "Enter a dataset path and a positive test size.";
+  const horizon = Number(document.querySelector("#simulation-horizon").value);
+  const paths = Number(document.querySelector("#simulation-paths").value);
+  const thresholdText = document.querySelector("#simulation-threshold").value.trim();
+  const threshold = thresholdText === "" ? null : Number(thresholdText);
+  if (!path || !Number.isInteger(testSize) || testSize < 1 || !Number.isInteger(horizon) || horizon < 1 || !Number.isInteger(paths) || paths < 1 || (threshold !== null && !Number.isFinite(threshold))) {
+    runStatus.textContent = "Enter a dataset path and valid positive experiment values.";
     return;
   }
   button.disabled = true;
@@ -132,15 +136,25 @@ async function runComparison(baseOverride = null) {
     const uncertaintyResponse = await fetch(`${base}/uncertainty/report?path=${encodeURIComponent(path)}&target_column=${encodeURIComponent(target)}&time_column=${encodeURIComponent(time)}&calibration_size=${Math.min(8, Math.max(1, testSize))}&test_size=${testSize}&coverage=0.9`);
     if (!uncertaintyResponse.ok) throw new Error("uncertainty request failed");
     const uncertaintyPayload = await uncertaintyResponse.json();
+    const simulationQuery = `${base}/simulation/report?path=${encodeURIComponent(path)}&target_column=${encodeURIComponent(target)}&horizon=${horizon}&paths=${paths}&seed=42${threshold === null ? "" : `&threshold=${encodeURIComponent(threshold)}`}`;
+    const simulationResponse = await fetch(simulationQuery);
+    if (!simulationResponse.ok) throw new Error("simulation request failed");
+    const simulationPayload = await simulationResponse.json();
     renderModels(payload.models.map(model => ({ ...model, name: friendlyModelName(model.model), width: model.interval_width, status: "Live API" })));
     const interval = uncertaintyPayload.interval;
     renderMetrics("uncertainty", [["Nominal coverage", `${(interval.nominal_coverage * 100).toFixed(0)}%`], ["Calibration size", `${interval.calibration_size} observations`], ["Empirical coverage", `${(interval.empirical_coverage * 100).toFixed(2)}%`], ["Mean interval width", Number(interval.mean_width).toFixed(4)]]);
+    const simulation = simulationPayload.simulation;
+    const finalMedian = simulation.quantiles["0.5"][simulation.horizon - 1];
+    const finalLow = simulation.quantiles["0.1"][simulation.horizon - 1];
+    const finalHigh = simulation.quantiles["0.9"][simulation.horizon - 1];
+    const crossing = simulation.probability_exceeds_threshold === null ? "not requested" : `${(simulation.probability_exceeds_threshold * 100).toFixed(2)}%`;
+    renderMetrics("simulation", [["Paths", String(simulation.paths)], ["Horizon", `${simulation.horizon} steps`], ["Median final value", Number(finalMedian).toFixed(2)], ["10%-90% final range", `${Number(finalLow).toFixed(2)}–${Number(finalHigh).toFixed(2)}`], ["Threshold probability", crossing]]);
     document.querySelector("#data-mode").textContent = "Live API";
     status.textContent = "Connected";
     status.className = "api-status connected";
     const split = summary.split;
     document.querySelector("#run-status").textContent = "Comparison complete";
-    document.querySelector("#run-summary").textContent = `${summary.rows} rows validated · ${split.train} train · ${split.validation} validation · ${split.test} test · ${payload.models.length} models compared · ${(interval.empirical_coverage * 100).toFixed(2)}% empirical coverage.`;
+    document.querySelector("#run-summary").textContent = `${summary.rows} rows validated · ${split.train} train · ${split.validation} validation · ${split.test} test · ${payload.models.length} models · ${(interval.empirical_coverage * 100).toFixed(2)}% coverage · ${simulation.paths} simulated paths.`;
   } catch (error) {
     status.textContent = "Snapshot mode";
     status.className = "api-status error";

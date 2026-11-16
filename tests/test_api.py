@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from deepstoch.api.service import dataset_summary, model_comparison, uncertainty_report
+from deepstoch.api.service import dataset_summary, model_comparison, simulation_report, uncertainty_report
 
 
 DEMO = Path(__file__).parents[1] / "data" / "demo_energy_demand.csv"
@@ -29,6 +29,15 @@ def test_uncertainty_service_returns_interval_diagnostics() -> None:
     assert interval["nominal_coverage"] == 0.9
     assert interval["test_size"] == 8
     assert interval["mean_width"] >= 0
+
+
+def test_simulation_service_returns_reproducible_trajectory_summary() -> None:
+    result = simulation_report(DEMO, horizon=4, paths=12, seed=7, threshold=700)
+    simulation = result["simulation"]
+    assert simulation["paths"] == 12
+    assert simulation["horizon"] == 4
+    assert len(simulation["quantiles"]["0.5"]) == 4
+    assert 0 <= simulation["probability_exceeds_threshold"] <= 1
 
 
 def test_fastapi_adapter_has_explicit_optional_dependency_boundary() -> None:

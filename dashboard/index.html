@@ -70,6 +70,9 @@
         <label>Target column<input id="target-column" value="target" /></label>
         <label>Time column<input id="time-column" value="timestamp" /></label>
         <label>Test size<input id="test-size" type="number" min="1" value="8" /></label>
+        <label>Horizon<input id="simulation-horizon" type="number" min="1" value="24" /></label>
+        <label>Paths<input id="simulation-paths" type="number" min="1" value="1000" /></label>
+        <label>Threshold<input id="simulation-threshold" type="number" placeholder="optional" /></label>
         <button id="run-comparison" type="button">Run comparison</button>
       </div>
       <div id="run-summary" class="run-summary">The static snapshot is currently displayed. Start the local API and run a dataset to replace it with live results.</div>
