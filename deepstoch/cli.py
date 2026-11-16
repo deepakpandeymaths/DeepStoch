@@ -24,6 +24,7 @@ from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
 from deepstoch.visualization.calibration import render_calibration_svg
+from deepstoch.scenario import build_scenario
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -139,6 +140,14 @@ def build_parser() -> argparse.ArgumentParser:
     compare.add_argument("--target-column", default="target")
     compare.add_argument("--test-size", type=int, default=8)
     compare.add_argument("--json", action="store_true")
+    scenario = commands.add_parser("scenario", help="Validate a structured forecasting scenario.")
+    scenario.add_argument("--description", required=True)
+    scenario.add_argument("--target", required=True)
+    scenario.add_argument("--horizon", type=int, required=True)
+    scenario.add_argument("--time-unit", default="hours")
+    scenario.add_argument("--dataset", type=Path, required=True)
+    scenario.add_argument("--evidence", default="timeseries", help="Comma-separated sources: timeseries,text,image,document,video.")
+    scenario.add_argument("--json", action="store_true")
     return parser
 
 
@@ -361,6 +370,18 @@ def main(argv: list[str] | None = None) -> int:
             print("model | RMSE | MAE | MAPE | coverage | interval width")
             for row in result:
                 print(f"{row.model} | {row.rmse if row.rmse is not None else '-'} | {row.mae if row.mae is not None else '-'} | {row.mape if row.mape is not None else '-'} | {row.coverage if row.coverage is not None else '-'} | {row.interval_width if row.interval_width is not None else '-'}")
+        return 0
+    if args.command == "scenario":
+        try:
+            result = build_scenario(args.description, args.target, args.horizon, args.time_unit, str(args.dataset), args.evidence.split(","))
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            for key, value in result.as_dict().items():
+                print(f"{key}: {value}")
         return 0
     if args.command == "ml":
         try:

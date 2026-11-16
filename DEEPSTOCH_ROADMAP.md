@@ -36,7 +36,8 @@ The first release will accept a time-series dataset, validate and preprocess it,
 5. Monte Carlo dropout, deep ensembles, bootstrap, and conformal prediction.
 6. Markov chains, Poisson processes, random walks, Brownian motion, and state-space models.
 7. Neural state-space models and neural stochastic differential equations.
-8. Optional Transformer, diffusion, reinforcement-learning, and LLM interface modules.
+8. Multimodal forecasting with structured scenarios, text, images, documents, and video.
+9. Optional Transformer, diffusion, reinforcement-learning, and controlled LLM interface modules.
 
 ## Main phases
 
@@ -75,6 +76,15 @@ Browser workflow, model comparison, rolling evidence, uncertainty summaries, sim
 ### Phase 8 - Hybrid research
 
 Local-level and local-trend state-space models, ML-plus-residual-state correction, rolling-origin evaluation, neural state-space training, checkpoint inference, calibration diagnostics, repeated seeds, and the read-only local experiment API. Neural-SDE prototypes remain future work.
+
+### Future multimodal extension
+
+The future DeepStoch Fusion direction will accept a structured forecasting
+scenario, time-series data, and optional contextual text, images, documents,
+and video. The current first step is only the validated scenario contract; no
+claim is made that arbitrary media can predict an unspecified future. Each
+future modality must be evaluated through ablations against a time-series-only
+baseline.
 
 ### Phase 9 - Dissertation release
 

@@ -165,6 +165,28 @@ This data is explicitly synthetic and must not be presented as real-world eviden
 
 ## Phase 8 local experiment API
 
+### Future multimodal direction
+
+The project will eventually support a structured scenario containing a
+forecasting question, target, horizon, time-series dataset, and optional text,
+image, document, or video evidence. The first implementation step is the
+validated scenario contract:
+
+```powershell
+python -m deepstoch scenario `
+  --description "High temperature is expected tomorrow" `
+  --target energy_demand `
+  --horizon 24 `
+  --time-unit hours `
+  --dataset data/demo_energy_demand.csv `
+  --evidence timeseries,text,image `
+  --json
+```
+
+This contract defines what future multimodal forecasting will mean. It does
+not claim that an arbitrary photo or video can predict an unspecified future.
+Future modalities must be compared against the time-series-only baseline.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the
