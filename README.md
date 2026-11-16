@@ -367,6 +367,13 @@ will receive. At this stage it does not train a multimodal model or combine
 image and document features into a forecast; it verifies that the inputs can
 be assembled consistently before modelling begins.
 
+Before the bundle is created, its dataset-readiness record checks the CSV path,
+required time column, target column, timestamp parsing, numeric target values,
+duplicate timestamps, chronological ordering, and minimum history for the
+requested horizon. It also reports the resulting chronological train,
+validation, and test sizes. An invalid dataset stops bundle creation instead of
+silently sending an unsuitable input to a forecasting model.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the

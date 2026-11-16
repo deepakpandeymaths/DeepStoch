@@ -163,6 +163,7 @@ def build_parser() -> argparse.ArgumentParser:
     bundle.add_argument("--horizon", type=int, required=True)
     bundle.add_argument("--time-unit", default="hours")
     bundle.add_argument("--dataset", type=Path, required=True)
+    bundle.add_argument("--time-column", default="timestamp")
     bundle.add_argument("--evidence", default="timeseries", help="Comma-separated sources.")
     bundle.add_argument("--text")
     bundle.add_argument("--document", action="append", default=[])
@@ -448,6 +449,7 @@ def main(argv: list[str] | None = None) -> int:
                 text=args.text,
                 documents=tuple(args.document),
                 images=tuple(args.image),
+                time_column=args.time_column,
             )
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
