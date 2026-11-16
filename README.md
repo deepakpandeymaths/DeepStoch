@@ -200,6 +200,12 @@ binary context signals. This is deliberately deterministic and auditable; it
 does not claim semantic understanding or causal inference, and it does not yet
 modify the forecasting model.
 
+The extracted context is converted into a provenance-aware feature registry.
+Each feature records its name, value, source type, source reference,
+confidence, and transformation. This registry is the contract that future
+image, document, and video processors must follow before their features can
+enter a forecasting model.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the

@@ -24,7 +24,7 @@ from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
 from deepstoch.visualization.calibration import render_calibration_svg
-from deepstoch.scenario import build_scenario, extract_text_context
+from deepstoch.scenario import build_scenario, context_to_registry, extract_text_context
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -392,10 +392,11 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
+        payload = result.as_dict() | {"features": context_to_registry(result).as_dict()}
         if args.json:
-            print(json.dumps(result.as_dict(), indent=2))
+            print(json.dumps(payload, indent=2))
         else:
-            for key, value in result.as_dict().items():
+            for key, value in payload.items():
                 print(f"{key}: {value}")
         return 0
     if args.command == "ml":
