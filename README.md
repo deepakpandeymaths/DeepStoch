@@ -187,6 +187,19 @@ This contract defines what future multimodal forecasting will mean. It does
 not claim that an arbitrary photo or video can predict an unspecified future.
 Future modalities must be compared against the time-series-only baseline.
 
+The first text-context extractor is also available:
+
+```powershell
+python -m deepstoch scenario-context `
+  --description "A heat wave and high temperature are expected during a scheduled event at 35 degrees" `
+  --json
+```
+
+It returns normalized text, token count, matched terms, numeric mentions, and
+binary context signals. This is deliberately deterministic and auditable; it
+does not claim semantic understanding or causal inference, and it does not yet
+modify the forecasting model.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the

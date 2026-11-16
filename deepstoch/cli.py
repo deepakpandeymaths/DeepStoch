@@ -24,7 +24,7 @@ from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
 from deepstoch.visualization.calibration import render_calibration_svg
-from deepstoch.scenario import build_scenario
+from deepstoch.scenario import build_scenario, extract_text_context
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -148,6 +148,9 @@ def build_parser() -> argparse.ArgumentParser:
     scenario.add_argument("--dataset", type=Path, required=True)
     scenario.add_argument("--evidence", default="timeseries", help="Comma-separated sources: timeseries,text,image,document,video.")
     scenario.add_argument("--json", action="store_true")
+    context = commands.add_parser("scenario-context", help="Extract transparent context signals from a scenario description.")
+    context.add_argument("--description", required=True)
+    context.add_argument("--json", action="store_true")
     return parser
 
 
@@ -374,6 +377,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "scenario":
         try:
             result = build_scenario(args.description, args.target, args.horizon, args.time_unit, str(args.dataset), args.evidence.split(","))
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            for key, value in result.as_dict().items():
+                print(f"{key}: {value}")
+        return 0
+    if args.command == "scenario-context":
+        try:
+            result = extract_text_context(args.description)
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
