@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from deepstoch.api.service import dataset_summary, model_comparison
+from deepstoch.api.service import dataset_summary, model_comparison, uncertainty_report
 
 
 DEMO = Path(__file__).parents[1] / "data" / "demo_energy_demand.csv"
@@ -21,6 +21,14 @@ def test_model_comparison_service_returns_dashboard_ready_rows() -> None:
     assert result["test_size"] == 8
     assert "linear_regression" in names
     assert "linear_ml_plus_residual_state" in names
+
+
+def test_uncertainty_service_returns_interval_diagnostics() -> None:
+    result = uncertainty_report(DEMO, calibration_size=8, test_size=8, coverage=0.9)
+    interval = result["interval"]
+    assert interval["nominal_coverage"] == 0.9
+    assert interval["test_size"] == 8
+    assert interval["mean_width"] >= 0
 
 
 def test_fastapi_adapter_has_explicit_optional_dependency_boundary() -> None:

@@ -32,6 +32,7 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "run-comparison" in html
     assert "dataset-path" in html
     assert "dataset/summary" in script
+    assert "uncertainty/report" in script
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

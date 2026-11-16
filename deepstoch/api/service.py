@@ -8,6 +8,7 @@ from deepstoch.data.loader import load_csv
 from deepstoch.data.split import chronological_split
 from deepstoch.data.validation import validate_rows
 from deepstoch.experiments.compare import compare_models
+from deepstoch.experiments.uncertainty import evaluate_conformal_linear
 
 
 def dataset_summary(
@@ -55,3 +56,21 @@ def model_comparison(
         "test_size": test_size,
         "models": [score.as_dict() for score in compare_models(rows, target_column=target_column, time_column=time_column, test_size=test_size)],
     }
+
+
+def uncertainty_report(
+    path: str | Path,
+    *,
+    time_column: str = "timestamp",
+    target_column: str = "target",
+    calibration_size: int = 8,
+    test_size: int = 8,
+    coverage: float = 0.9,
+) -> dict[str, object]:
+    """Return a chronological split-conformal interval report for a CSV dataset."""
+    headers, rows = load_csv(Path(path))
+    validation = validate_rows(headers, rows, time_column=time_column, target_column=target_column)
+    if not validation.valid:
+        raise ValueError("dataset failed validation; call dataset_summary for details")
+    interval = evaluate_conformal_linear(rows, target_column, time_column, calibration_size, test_size, coverage)
+    return {"dataset": dataset_summary(path, time_column=time_column, target_column=target_column), "interval": interval.as_dict()}

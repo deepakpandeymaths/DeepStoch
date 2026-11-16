@@ -188,6 +188,7 @@ Useful endpoints:
 http://127.0.0.1:8001/health
 http://127.0.0.1:8001/dataset/summary?path=D:/Stochastic-Process-used-in-Software-reliability/DeepStoch/data/demo_energy_demand.csv
 http://127.0.0.1:8001/models/compare?path=D:/Stochastic-Process-used-in-Software-reliability/DeepStoch/data/demo_energy_demand.csv&test_size=8
+http://127.0.0.1:8001/uncertainty/report?path=D:/Stochastic-Process-used-in-Software-reliability/DeepStoch/data/demo_energy_demand.csv&calibration_size=8&test_size=8&coverage=0.9
 ```
 
 The dashboard connection is the next Phase 8 milestone. Until then, the
@@ -217,7 +218,9 @@ data/real_world/uci_appliances.csv
 ```
 
 The browser displays the returned row count and train/validation/test split,
-and keeps the last static or successful result visible if a run fails.
+then requests a split-conformal uncertainty report and displays empirical
+coverage and mean interval width. It keeps the last static or successful result
+visible if a run fails.
 
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation

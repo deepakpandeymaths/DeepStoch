@@ -129,13 +129,18 @@ async function runComparison(baseOverride = null) {
     const response = await fetch(`${base}/models/compare?path=${encodeURIComponent(path)}&target_column=${encodeURIComponent(target)}&time_column=${encodeURIComponent(time)}&test_size=${testSize}`);
     if (!response.ok) throw new Error("comparison request failed");
     const payload = await response.json();
+    const uncertaintyResponse = await fetch(`${base}/uncertainty/report?path=${encodeURIComponent(path)}&target_column=${encodeURIComponent(target)}&time_column=${encodeURIComponent(time)}&calibration_size=${Math.min(8, Math.max(1, testSize))}&test_size=${testSize}&coverage=0.9`);
+    if (!uncertaintyResponse.ok) throw new Error("uncertainty request failed");
+    const uncertaintyPayload = await uncertaintyResponse.json();
     renderModels(payload.models.map(model => ({ ...model, name: friendlyModelName(model.model), width: model.interval_width, status: "Live API" })));
+    const interval = uncertaintyPayload.interval;
+    renderMetrics("uncertainty", [["Nominal coverage", `${(interval.nominal_coverage * 100).toFixed(0)}%`], ["Calibration size", `${interval.calibration_size} observations`], ["Empirical coverage", `${(interval.empirical_coverage * 100).toFixed(2)}%`], ["Mean interval width", Number(interval.mean_width).toFixed(4)]]);
     document.querySelector("#data-mode").textContent = "Live API";
     status.textContent = "Connected";
     status.className = "api-status connected";
     const split = summary.split;
     document.querySelector("#run-status").textContent = "Comparison complete";
-    document.querySelector("#run-summary").textContent = `${summary.rows} rows validated · ${split.train} train · ${split.validation} validation · ${split.test} test · ${payload.models.length} models compared.`;
+    document.querySelector("#run-summary").textContent = `${summary.rows} rows validated · ${split.train} train · ${split.validation} validation · ${split.test} test · ${payload.models.length} models compared · ${(interval.empirical_coverage * 100).toFixed(2)}% empirical coverage.`;
   } catch (error) {
     status.textContent = "Snapshot mode";
     status.className = "api-status error";
