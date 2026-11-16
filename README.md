@@ -219,6 +219,18 @@ reference. It is intentionally not a PDF OCR, image-understanding, or video
 prediction system yet. Those adapters will be added separately and evaluated
 against the time-series-only baseline before they influence a model.
 
+The first image adapter currently extracts reproducible PNG/JPEG metadata:
+
+```powershell
+python -m deepstoch image-features path/to/photo.png --json
+```
+
+It records width, height, aspect ratio, file size, image type, and source path.
+This is an auditable image-ingestion foundation, not visual scene recognition
+or future prediction. A learned image encoder will be introduced only after a
+separate dataset, label definition, train/test protocol, and ablation study are
+specified.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the
