@@ -40,6 +40,8 @@ const snapshot = {
   ]
 };
 
+let liveRunContext = null;
+
 const copilotAnswers = [
   { keys: ["what is deepstoch", "purpose", "meaning", "do"], answer: "DeepStoch is a research platform for forecasting time-series data under uncertainty. It learns a likely future value, produces an interval around that forecast, simulates plausible future paths, and checks the interval on future observations. The research goal is calibrated forecasting—not just a low error score." },
   { keys: ["uncertainty", "interval", "trust", "coverage"], answer: "A point forecast can say 620, but it does not say how risky that estimate is. DeepStoch adds a prediction interval such as [580, 665]. Coverage asks how often future observations actually fall inside those intervals. The current real-world neural experiment achieved 94.76% mean empirical coverage against a 90% nominal target across 11 chronological folds." },
@@ -51,6 +53,11 @@ const copilotAnswers = [
 
 function answerCopilot(question) {
   const normalized = question.toLowerCase();
+  if (liveRunContext && (normalized.includes("current") || normalized.includes("selected") || normalized.includes("live") || normalized.includes("result") || normalized.includes("best") || normalized.includes("simulation"))) {
+    const best = [...liveRunContext.models].sort((a, b) => Number(a.rmse) - Number(b.rmse))[0];
+    const thresholdText = liveRunContext.simulation.probability_exceeds_threshold === null ? "No threshold was requested." : `The threshold-crossing probability is ${(liveRunContext.simulation.probability_exceeds_threshold * 100).toFixed(2)}%.`;
+    return `For the current live run on ${liveRunContext.rows} rows, ${liveRunContext.models.length} models were compared. The lowest holdout RMSE is ${Number(best.rmse).toFixed(4)} from ${friendlyModelName(best.model)}. Empirical coverage is ${(liveRunContext.interval.empirical_coverage * 100).toFixed(2)}% at nominal ${(liveRunContext.interval.nominal_coverage * 100).toFixed(0)}%, with mean interval width ${Number(liveRunContext.interval.mean_width).toFixed(4)}. The simulation used ${liveRunContext.simulation.paths} paths over ${liveRunContext.simulation.horizon} steps. ${thresholdText}`;
+  }
   const match = copilotAnswers.find(item => item.keys.some(key => normalized.includes(key)));
   return match ? match.answer : "DeepStoch is building a trustworthy forecasting workflow: compare models, quantify uncertainty, test calibration on future data, and document the evidence. Try asking about the purpose, uncertainty, neural model, real-world experiment, or next steps.";
 }
@@ -149,12 +156,14 @@ async function runComparison(baseOverride = null) {
     const finalHigh = simulation.quantiles["0.9"][simulation.horizon - 1];
     const crossing = simulation.probability_exceeds_threshold === null ? "not requested" : `${(simulation.probability_exceeds_threshold * 100).toFixed(2)}%`;
     renderMetrics("simulation", [["Paths", String(simulation.paths)], ["Horizon", `${simulation.horizon} steps`], ["Median final value", Number(finalMedian).toFixed(2)], ["10%-90% final range", `${Number(finalLow).toFixed(2)}–${Number(finalHigh).toFixed(2)}`], ["Threshold probability", crossing]]);
+    liveRunContext = { rows: summary.rows, models: payload.models, interval, simulation };
     document.querySelector("#data-mode").textContent = "Live API";
     status.textContent = "Connected";
     status.className = "api-status connected";
     const split = summary.split;
     document.querySelector("#run-status").textContent = "Comparison complete";
     document.querySelector("#run-summary").textContent = `${summary.rows} rows validated · ${split.train} train · ${split.validation} validation · ${split.test} test · ${payload.models.length} models · ${(interval.empirical_coverage * 100).toFixed(2)}% coverage · ${simulation.paths} simulated paths.`;
+    addChatMessage("assistant", `Live run complete for ${summary.rows} rows. Ask me about the current best model, empirical coverage, interval width, or simulation result.`);
   } catch (error) {
     status.textContent = "Snapshot mode";
     status.className = "api-status error";

@@ -35,6 +35,8 @@ def test_dashboard_contains_rolling_evaluation_view() -> None:
     assert "uncertainty/report" in script
     assert "simulation/report" in script
     assert "simulation-horizon" in html
+    assert "liveRunContext" in script
+    assert "Live run complete" in script
 
 
 def test_dashboard_contains_unified_model_comparison() -> None:

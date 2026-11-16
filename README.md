@@ -225,6 +225,12 @@ future trajectories and displays the median final value, 10%-90% range, and
 optional threshold probability. It keeps the last static or successful result
 visible if a run fails.
 
+After a successful live run, the Research Copilot receives only that run’s
+approved summary metrics. It can then explain the current best holdout model,
+empirical coverage, interval width, simulation horizon, path count, and
+threshold probability. If no live run has completed, it continues to explain
+the documented snapshot and clearly remains a local rule-based assistant.
+
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation
 dashboard/       Static research dashboard prototype
