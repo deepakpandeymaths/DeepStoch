@@ -344,6 +344,29 @@ or future prediction. A learned image encoder will be introduced only after a
 separate dataset, label definition, train/test protocol, and ablation study are
 specified.
 
+The scenario-bundle command combines the scenario contract and attached
+evidence into one JSON object:
+
+```powershell
+python -m deepstoch scenario-bundle `
+  --description "Demand tomorrow may be affected by heat" `
+  --target energy_demand `
+  --horizon 24 `
+  --time-unit hours `
+  --dataset data/demo_energy_demand.csv `
+  --evidence timeseries,text,document,image `
+  --text "Heat expected at 35 degrees" `
+  --document data/scenario_notes.md `
+  --image path/to/photo.png `
+  --json
+```
+
+The bundle records the validated scenario, attached source types, feature
+count, and every feature's provenance. It is the boundary that a future model
+will receive. At this stage it does not train a multimodal model or combine
+image and document features into a forecast; it verifies that the inputs can
+be assembled consistently before modelling begins.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the

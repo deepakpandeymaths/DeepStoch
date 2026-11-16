@@ -24,7 +24,7 @@ from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
 from deepstoch.visualization.calibration import render_calibration_svg
-from deepstoch.scenario import build_scenario, context_to_registry, extract_document_evidence, extract_image_evidence, extract_text_context
+from deepstoch.scenario import build_evidence_bundle, build_scenario, context_to_registry, extract_document_evidence, extract_image_evidence, extract_text_context
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -157,6 +157,17 @@ def build_parser() -> argparse.ArgumentParser:
     image = commands.add_parser("image-features", help="Extract reproducible metadata from a local PNG or JPEG image.")
     image.add_argument("path", type=Path, help="Path to a PNG or JPEG image.")
     image.add_argument("--json", action="store_true")
+    bundle = commands.add_parser("scenario-bundle", help="Build one validated scenario and evidence bundle.")
+    bundle.add_argument("--description", required=True)
+    bundle.add_argument("--target", required=True)
+    bundle.add_argument("--horizon", type=int, required=True)
+    bundle.add_argument("--time-unit", default="hours")
+    bundle.add_argument("--dataset", type=Path, required=True)
+    bundle.add_argument("--evidence", default="timeseries", help="Comma-separated sources.")
+    bundle.add_argument("--text")
+    bundle.add_argument("--document", action="append", default=[])
+    bundle.add_argument("--image", action="append", default=[])
+    bundle.add_argument("--json", action="store_true")
     return parser
 
 
@@ -420,6 +431,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "image-features":
         try:
             result = extract_image_evidence(args.path)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            for key, value in result.as_dict().items():
+                print(f"{key}: {value}")
+        return 0
+    if args.command == "scenario-bundle":
+        try:
+            scenario = build_scenario(args.description, args.target, args.horizon, args.time_unit, str(args.dataset), args.evidence.split(","))
+            result = build_evidence_bundle(
+                scenario,
+                text=args.text,
+                documents=tuple(args.document),
+                images=tuple(args.image),
+            )
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
