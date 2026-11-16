@@ -27,6 +27,119 @@ The first product target is a probabilistic time-series forecasting platform wit
 
 Read [DEEPSTOCH_ROADMAP.md](DEEPSTOCH_ROADMAP.md) for the long-term plan, [the complete project report](docs/DEEPSTOCH_PROJECT_REPORT.tex), and [the editable SOP](deepstoch_sop/main.tex).
 
+## Complete software status
+
+This section is the practical software record of what has been built so far.
+DeepStoch is not only a written research idea: it is a local, testable Python
+platform with a browser interface, modelling pipeline, uncertainty tools,
+simulation tools, an optional local API, and the first evidence-ingestion
+contracts for future multimodal forecasting.
+
+### What DeepStoch does today
+
+Given a chronological CSV time series, DeepStoch can:
+
+1. inspect and validate the columns, timestamps, missing values, ordering, and
+   numerical target values;
+2. create chronological train, validation, and test partitions without random
+   temporal leakage;
+3. calculate reference forecasts using seasonal-naive and other simple
+   baselines;
+4. train and evaluate classical machine-learning models, including linear
+   regression and random forest;
+5. train neural sequence models, including the optional LSTM workflow and the
+   Phase 8 neural state-space model built with PyTorch;
+6. estimate prediction intervals and measure empirical coverage, interval
+   width, and calibration error;
+7. generate stochastic future paths and estimate quantiles or threshold
+   crossing probabilities;
+8. evaluate state-space, machine-learning, neural, and hybrid models through
+   chronological holdouts and rolling-origin experiments;
+9. compare models in one structured report;
+10. display experiment evidence through the local browser dashboard;
+11. connect the dashboard to a local read-only API when the optional API
+    dependencies are installed;
+12. preserve local run history and compare saved dashboard runs in the browser;
+13. validate a structured forecasting scenario containing a question, target,
+    horizon, dataset, and declared evidence sources; and
+14. extract transparent, provenance-aware features from text, documents, and
+    basic image metadata.
+
+### What DeepStoch does not do yet
+
+The current software does not claim to be a general-purpose chatbot, an
+autonomous decision-maker, a guaranteed prediction engine, or a system that
+can look at an arbitrary photo or video and reliably predict the future. The
+dashboard copilot is a local rule-based explainer, not an LLM. The document
+adapter does not perform OCR, and the image adapter does not perform object
+recognition or scene understanding. These boundaries are deliberate: each new
+capability must have a defined input, output, provenance record, evaluation
+protocol, and comparison against a time-series-only baseline.
+
+### Implemented feature map
+
+| Area | Current implementation | Main location |
+| --- | --- | --- |
+| Data loading | CSV loading, type conversion, and data errors | `deepstoch/data/loader.py` |
+| Data validation | Header, timestamp, target, missing-value, and ordering checks | `deepstoch/data/validation.py` |
+| Dataset reports | Structured validation and split reports | `deepstoch/data/report.py` |
+| Chronological splitting | Leakage-aware temporal partitions | `deepstoch/data/split.py` |
+| Sequence preparation | Windowed sequences for neural models | `deepstoch/data/sequences.py` |
+| Simple baselines | Seasonal-naive and reference forecast scores | `deepstoch/experiments/baselines.py` |
+| Classical ML | Linear regression and random forest evaluation | `deepstoch/experiments/ml.py` |
+| Neural foundation | LSTM training workflow | `deepstoch/models/lstm.py` |
+| State-space models | Local-level and local-trend stochastic states | `deepstoch/experiments/hybrid.py` |
+| Hybrid forecasting | ML residual correction plus stochastic state | `deepstoch/experiments/hybrid.py` |
+| Neural state-space | Probabilistic latent-state model and checkpointing | `deepstoch/models/neural_state.py` |
+| Uncertainty | Conformal intervals and coverage evaluation | `deepstoch/experiments/uncertainty.py` |
+| Simulation | Repeated stochastic future trajectories | `deepstoch/experiments/simulation.py` |
+| Rolling evaluation | Repeated future-block validation | `deepstoch/experiments/rolling.py` |
+| Model comparison | Unified metrics across available models | `deepstoch/experiments/compare.py` |
+| Calibration reports | Coverage and interval-width SVG output | `deepstoch/visualization/calibration.py` |
+| Scenario contract | Validated future forecasting scenario | `deepstoch/scenario/spec.py` |
+| Text context | Deterministic terms and number extraction | `deepstoch/scenario/context.py` |
+| Feature provenance | Source, confidence, timestamp, and transformation records | `deepstoch/scenario/registry.py` |
+| Document evidence | UTF-8 TXT, Markdown, LOG, and JSON extraction | `deepstoch/scenario/document.py` |
+| Image evidence | PNG/JPEG dimensions and metadata features | `deepstoch/scenario/image.py` |
+| Local API | Dataset, model, uncertainty, and simulation endpoints | `deepstoch/api/` |
+| Dashboard | Browser workspace, copilot, evidence, runs, and comparisons | `dashboard/` |
+| CLI | Reproducible commands for each major workflow | `deepstoch/cli.py` |
+
+### Build history, in working order
+
+| Milestone | Result |
+| --- | --- |
+| Foundation | Python package, CLI, configuration, tests, licence, project structure, and documentation were created. |
+| Data foundation | CSV loading, schema checks, chronological validation, reports, and demo data were added. |
+| Baselines | Simple reference forecasts and error metrics were implemented. |
+| Classical ML | Linear regression and random forest evaluation were added. |
+| Deep learning | LSTM sequence preparation and training workflow were added. |
+| Uncertainty | Conformal prediction intervals, coverage, width, and calibration measurements were added. |
+| Simulation | Repeated stochastic future paths, quantiles, and threshold probabilities were added. |
+| Dashboard | A compact browser research workspace and local rule-based copilot were created. |
+| Hybrid research | Local-level, local-trend, ML-residual, and neural state-space experiments were added. |
+| Live dashboard | Dataset selection, live model comparison, uncertainty, simulation, run history, and saved-run comparison were connected. |
+| Scenario foundation | Structured scenarios, text-context extraction, and a provenance-aware feature registry were added. |
+| Document evidence | Local UTF-8 document extraction with file provenance was added. |
+| Image evidence | Dependency-free PNG/JPEG metadata extraction with image provenance was added. |
+
+### Quality checkpoint
+
+The latest local verification contains **56 passing tests**. The test suite
+covers data validation, model calculations, uncertainty metrics, simulation,
+rolling evaluation, dashboard contracts, scenario validation, provenance
+validation, document extraction, and image metadata extraction.
+
+Run the verification yourself from the repository root:
+
+```powershell
+python -m pytest -q
+```
+
+The project is currently a local prototype. Results from the small demo data
+are useful for testing the software path, but they are not evidence that any
+model will perform well in a new real-world domain.
+
 ## Quick start
 
 ```powershell
