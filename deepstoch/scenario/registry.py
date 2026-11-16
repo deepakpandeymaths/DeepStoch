@@ -49,11 +49,18 @@ class FeatureRegistry:
         return len(self._features)
 
 
-def context_to_registry(context: TextContext, *, source_ref: str = "scenario.description") -> FeatureRegistry:
+def context_to_registry(
+    context: TextContext,
+    *,
+    source_ref: str = "scenario.description",
+    source_type: str = "text",
+) -> FeatureRegistry:
     """Convert extracted text signals into provenance-aware numeric features."""
+    if source_type not in {"timeseries", "text", "image", "document", "video"}:
+        raise ValueError(f"unsupported feature source: {source_type}")
     registry = FeatureRegistry()
     for name, value in context.detected_signals.items():
-        registry.add(EvidenceFeature(name, value, "text", source_ref, None, 1.0, "keyword_presence"))
+        registry.add(EvidenceFeature(name, value, source_type, source_ref, None, 1.0, "keyword_presence"))
     for index, value in enumerate(context.numeric_mentions):
-        registry.add(EvidenceFeature(f"numeric_mention_{index + 1}", value, "text", source_ref, None, 1.0, "regex_number_extraction"))
+        registry.add(EvidenceFeature(f"numeric_mention_{index + 1}", value, source_type, source_ref, None, 1.0, "regex_number_extraction"))
     return registry

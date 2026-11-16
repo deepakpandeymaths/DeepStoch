@@ -206,6 +206,19 @@ confidence, and transformation. This registry is the contract that future
 image, document, and video processors must follow before their features can
 enter a forecasting model.
 
+The first document adapter is now available for local UTF-8 TXT, Markdown, LOG,
+and JSON files:
+
+```powershell
+python -m deepstoch document-features data/scenario_notes.md --json
+```
+
+The adapter validates the file type (and JSON syntax when applicable), extracts
+the same transparent text signals, and records the document path as the source
+reference. It is intentionally not a PDF OCR, image-understanding, or video
+prediction system yet. Those adapters will be added separately and evaluated
+against the time-series-only baseline before they influence a model.
+
 Phase 8 includes a dependency-light service layer and an optional FastAPI
 adapter. This API is local and read-only in the first milestone: it summarizes
 a CSV dataset and returns the unified chronological model comparison for the

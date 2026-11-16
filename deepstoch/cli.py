@@ -24,7 +24,7 @@ from deepstoch.models.neural_state import train_neural_state_space
 from deepstoch.experiments.neural_eval import evaluate_neural_state_space
 from deepstoch.experiments.compare import compare_models
 from deepstoch.visualization.calibration import render_calibration_svg
-from deepstoch.scenario import build_scenario, context_to_registry, extract_text_context
+from deepstoch.scenario import build_scenario, context_to_registry, extract_document_evidence, extract_text_context
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -151,6 +151,9 @@ def build_parser() -> argparse.ArgumentParser:
     context = commands.add_parser("scenario-context", help="Extract transparent context signals from a scenario description.")
     context.add_argument("--description", required=True)
     context.add_argument("--json", action="store_true")
+    document = commands.add_parser("document-features", help="Extract transparent features from a local text document.")
+    document.add_argument("path", type=Path, help="Path to a UTF-8 TXT, Markdown, LOG, or JSON document.")
+    document.add_argument("--json", action="store_true")
     return parser
 
 
@@ -397,6 +400,18 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(payload, indent=2))
         else:
             for key, value in payload.items():
+                print(f"{key}: {value}")
+        return 0
+    if args.command == "document-features":
+        try:
+            result = extract_document_evidence(args.path)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps(result.as_dict(), indent=2))
+        else:
+            for key, value in result.as_dict().items():
                 print(f"{key}: {value}")
         return 0
     if args.command == "ml":

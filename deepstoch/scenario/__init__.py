@@ -2,6 +2,17 @@
 
 from deepstoch.scenario.spec import ScenarioSpec, build_scenario
 from deepstoch.scenario.context import TextContext, extract_text_context
+from deepstoch.scenario.document import DocumentEvidence, extract_document_evidence
 from deepstoch.scenario.registry import EvidenceFeature, FeatureRegistry, context_to_registry
 
-__all__ = ["EvidenceFeature", "FeatureRegistry", "ScenarioSpec", "TextContext", "build_scenario", "context_to_registry", "extract_text_context"]
+__all__ = [
+    "DocumentEvidence",
+    "EvidenceFeature",
+    "FeatureRegistry",
+    "ScenarioSpec",
+    "TextContext",
+    "build_scenario",
+    "context_to_registry",
+    "extract_document_evidence",
+    "extract_text_context",
+]
