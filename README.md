@@ -231,6 +231,12 @@ empirical coverage, interval width, simulation horizon, path count, and
 threshold probability. If no live run has completed, it continues to explain
 the documented snapshot and clearly remains a local rule-based assistant.
 
+The dashboard also stores the latest successful run summaries in browser
+`localStorage`. Each entry records the dataset path, timestamp, row count,
+number of models, best model, RMSE, coverage, simulation horizon, and path
+count. The history is limited to the latest ten local runs and can be cleared
+with the `Clear history` control. No run history is uploaded by this feature.
+
 ```text
 deepstoch/       Python package, CLI, models, data, experiments, and evaluation
 dashboard/       Static research dashboard prototype

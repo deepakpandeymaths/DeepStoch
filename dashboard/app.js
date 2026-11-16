@@ -41,6 +41,24 @@ const snapshot = {
 };
 
 let liveRunContext = null;
+const HISTORY_KEY = "deepstoch.runHistory.v1";
+
+function readRunHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch (_) { return []; }
+}
+
+function renderRunHistory() {
+  const history = readRunHistory();
+  const target = document.querySelector("#run-history");
+  if (!history.length) { target.innerHTML = '<span class="muted">No live runs saved yet.</span>'; return; }
+  target.innerHTML = history.slice(0, 5).map(run => `<article class="history-row"><div><strong>${run.path}</strong><small>${run.timestamp} · ${run.rows} rows · ${run.models} models</small></div><span>${run.coverage} coverage<br>${run.bestModel}</span></article>`).join("");
+}
+
+function saveRunHistory(run) {
+  const history = [run, ...readRunHistory()].slice(0, 10);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  renderRunHistory();
+}
 
 const copilotAnswers = [
   { keys: ["what is deepstoch", "purpose", "meaning", "do"], answer: "DeepStoch is a research platform for forecasting time-series data under uncertainty. It learns a likely future value, produces an interval around that forecast, simulates plausible future paths, and checks the interval on future observations. The research goal is calibrated forecasting—not just a low error score." },
@@ -157,6 +175,8 @@ async function runComparison(baseOverride = null) {
     const crossing = simulation.probability_exceeds_threshold === null ? "not requested" : `${(simulation.probability_exceeds_threshold * 100).toFixed(2)}%`;
     renderMetrics("simulation", [["Paths", String(simulation.paths)], ["Horizon", `${simulation.horizon} steps`], ["Median final value", Number(finalMedian).toFixed(2)], ["10%-90% final range", `${Number(finalLow).toFixed(2)}–${Number(finalHigh).toFixed(2)}`], ["Threshold probability", crossing]]);
     liveRunContext = { rows: summary.rows, models: payload.models, interval, simulation };
+    const bestLiveModel = [...payload.models].sort((a, b) => Number(a.rmse) - Number(b.rmse))[0];
+    saveRunHistory({ path, timestamp: new Date().toLocaleString(), rows: summary.rows, models: payload.models.length, bestModel: friendlyModelName(bestLiveModel.model), coverage: `${(interval.empirical_coverage * 100).toFixed(2)}%`, rmse: Number(bestLiveModel.rmse).toFixed(4), horizon: simulation.horizon, paths: simulation.paths });
     document.querySelector("#data-mode").textContent = "Live API";
     status.textContent = "Connected";
     status.className = "api-status connected";
@@ -176,6 +196,8 @@ async function runComparison(baseOverride = null) {
 }
 document.querySelector("#api-connect").addEventListener("click", connectLocalApi);
 document.querySelector("#run-comparison").addEventListener("click", () => runComparison());
+document.querySelector("#clear-history").addEventListener("click", () => { localStorage.removeItem(HISTORY_KEY); renderRunHistory(); });
+renderRunHistory();
 
 function renderMetrics(id, metrics) {
   document.querySelector(`#${id}`).innerHTML = metrics.map(([label, value]) => `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join("");
